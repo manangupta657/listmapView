@@ -26,17 +26,6 @@ export default function SingleDetails(props: any) {
           primary={props.primary}
           secondary={
             <Stack direction="row">
-              {/* <Avatar
-                sx={{
-                  background: props.color,
-                  width: "20px",
-                  height: "20px",
-                  fontSize: "0.75rem",
-                  marginRight: "5px"
-                }}
-              >
-                {props.id}
-              </Avatar> */}
               {props.secondary}
             </Stack>
           }
@@ -45,7 +34,7 @@ export default function SingleDetails(props: any) {
       </ListItemButton>
 
       <Collapse in={open} timeout="auto" unmountOnExit>
-        <BasicTimeline color={props.color} />
+        <BasicTimeline routes={props.routes} color={props.color} />
       </Collapse>
       <Divider />
     </>
