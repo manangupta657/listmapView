@@ -21,7 +21,7 @@ export default function LeftAlignedTimeline(props: Props) {
     <Timeline
       sx={{
         [`& .${timelineOppositeContentClasses.root}`]: {
-          flex: 0.1,
+          flex: 0.3,
         },
       }}
     >
@@ -33,7 +33,7 @@ export default function LeftAlignedTimeline(props: Props) {
             </TimelineOppositeContent>
             <TimelineSeparator>
               <TimelineDot sx={{ backgroundColor: props.color }} />
-              {index !== props.routes.length - 1 ? <TimelineConnector /> : null}
+              {index !== props.routes.length - 1 ? <TimelineConnector sx={{height: "10px"}} /> : null}
             </TimelineSeparator>
 
             <TimelineContent>{item[0].address}</TimelineContent>
