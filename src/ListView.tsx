@@ -13,7 +13,7 @@ type Props = {
 }
 export default function ListView({data, date, setDate}: Props) {
   return (
-    <List sx={{ width: "100%", height: "100vh", bgcolor: "background.paper" }}>
+    <List sx={{ width: "100%", height: "100vh",overflowY:"scroll" , bgcolor: "background.paper" }}>
       <div className="date-picker-container">
         <DatePickerValue date={date} setDate={setDate} />
       </div>
