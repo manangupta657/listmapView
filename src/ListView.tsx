@@ -3,21 +3,27 @@ import Divider from "@mui/material/Divider";
 import SingleDetails from "./SingleDetails";
 import { colors } from "./constants";
 import DatePickerValue from "./DatePicker";
-import { clusters } from "./constants";
-import { formatDate } from "./functionss";
+import { Clusters } from "./types";
+import { Dayjs } from "dayjs";
 
-export default function FolderList() {
+type Props = {
+  data: Clusters | null,
+  date: Dayjs,
+  setDate: (date: Dayjs) => void
+}
+export default function ListView({data, date, setDate}: Props) {
   return (
     <List sx={{ width: "100%", height: "100vh", bgcolor: "background.paper" }}>
       <div className="date-picker-container">
-        <DatePickerValue />
+        <DatePickerValue date={date} setDate={setDate} />
       </div>
       <Divider />
-      {clusters.map((item, index) => (
+      {data && data.map((item, index) => (
         <SingleDetails
           color={colors[index]}
-          primary={item.address}
-          secondary={`${formatDate(item?.start_time)} - ${formatDate(item?.end_time)}`}
+          label={item.address}
+          startTime={item?.start_time}
+          endTime={item?.end_time}
           id={index + 1}
           routes = {item.route_to_next_cluster}
         />

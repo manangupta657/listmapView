@@ -8,8 +8,15 @@ import TimelineOppositeContent, {
   timelineOppositeContentClasses,
 } from "@mui/lab/TimelineOppositeContent";
 import { formatDate } from "./functionss";
+import { RouteToNextCluster } from "./types";
 
-export default function LeftAlignedTimeline(props: any) {
+
+type Props = {
+  routes: RouteToNextCluster[][],
+  color: string
+}
+
+export default function LeftAlignedTimeline(props: Props) {
   return (
     <Timeline
       sx={{
@@ -18,18 +25,18 @@ export default function LeftAlignedTimeline(props: any) {
         },
       }}
     >
-      {props.routes.map((item: any, index: number) => {
+      {props.routes.map((item, index: number) => {
         return (
           <TimelineItem>
             <TimelineOppositeContent color="textSecondary">
-              {formatDate(item.time)}
+              {formatDate(item[0].datetime1)}
             </TimelineOppositeContent>
             <TimelineSeparator>
               <TimelineDot sx={{ backgroundColor: props.color }} />
               {index !== props.routes.length - 1 ? <TimelineConnector /> : null}
             </TimelineSeparator>
 
-            <TimelineContent>{item.address}</TimelineContent>
+            <TimelineContent>{item[0].address}</TimelineContent>
           </TimelineItem>
         );
       })}

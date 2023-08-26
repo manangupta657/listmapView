@@ -8,8 +8,19 @@ import BasicTimeline from "./TimeLine";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Avatar from "@mui/material/Avatar";
 import Stack from "@mui/material/Stack";
+import { RouteToNextCluster } from "./types";
+import { formatDate } from "./functionss";
 
-export default function SingleDetails(props: any) {
+type Props = {
+  color: string;
+  label: string;
+  startTime: string;
+  endTime: string;
+  id: number;
+  routes: RouteToNextCluster[][]
+}
+
+export default function SingleDetails(props: Props) {
   const [open, setOpen] = React.useState(false);
 
   const handleClick = () => {
@@ -23,10 +34,10 @@ export default function SingleDetails(props: any) {
           <Avatar sx={{ background: props.color }}>{props.id}</Avatar>
         </ListItemAvatar>
         <ListItemText
-          primary={props.primary}
+          primary={props.label}
           secondary={
             <Stack direction="row">
-              {props.secondary}
+              {`${formatDate(props.startTime)} - ${formatDate(props.endTime)}`}
             </Stack>
           }
         />
