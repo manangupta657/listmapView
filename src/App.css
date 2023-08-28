@@ -1,7 +1,6 @@
 .map-image{
   position: absolute;
   width: 100%;
-  z-index: -1;
 }
 .map-image img{
   width: 100%;
@@ -26,4 +25,52 @@
 
 .MuiTimelineItem-root{
   min-height: 50px !important;
+}
+
+.directions {
+  position: absolute;
+  background: black;
+  top: 1rem;
+  right: 1rem;
+  width: 25%;
+  padding: 1rem;
+}
+
+#map {
+  width: 100%;
+  height: 100vh;
+}
+
+.marker {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  font-family: "Roboto","Helvetica","Arial",sans-serif;
+  font-size: 0.75rem;
+  line-height: 1;
+  border-radius: 50%;
+  overflow: hidden;
+  user-select: none;
+  color: #fff;
+  background-color: #bdbdbd;
+  background: #512B81;
+}
+/* .marker {
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  background-color: black;
+} */
+
+.marker.halt{
+  width: 30px;
+  height: 30px;
+}
+.marker.route{
+  width: 15px;
+  height: 15px;
 }
