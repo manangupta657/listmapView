@@ -6,7 +6,7 @@ export interface Cluster {
   address: string
   start_time: string
   end_time: string
-  route_to_next_cluster: RouteToNextCluster[][]
+  route_to_next_cluster: RouteToNextCluster[]
 }
 
 export interface RouteToNextCluster {

@@ -17,7 +17,7 @@ type Props = {
   startTime: string;
   endTime: string;
   id: number;
-  routes: RouteToNextCluster[][]
+  routes: RouteToNextCluster[]
 }
 
 export default function SingleDetails(props: Props) {

@@ -12,7 +12,7 @@ import { RouteToNextCluster } from "./types";
 
 
 type Props = {
-  routes: RouteToNextCluster[][],
+  routes: RouteToNextCluster[],
   color: string
 }
 
@@ -29,14 +29,14 @@ export default function LeftAlignedTimeline(props: Props) {
         return (
           <TimelineItem>
             <TimelineOppositeContent color="textSecondary">
-              {formatDate(item[0].datetime1)}
+              {formatDate(item.datetime1)}
             </TimelineOppositeContent>
             <TimelineSeparator>
               <TimelineDot sx={{ backgroundColor: props.color }} />
               {index !== props.routes.length - 1 ? <TimelineConnector sx={{height: "10px"}} /> : null}
             </TimelineSeparator>
 
-            <TimelineContent>{item[0].address}</TimelineContent>
+            <TimelineContent>{item.address}</TimelineContent>
           </TimelineItem>
         );
       })}
