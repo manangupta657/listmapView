@@ -6,6 +6,7 @@ import { Clusters } from "./types";
 import { getClusters } from "./functionss";
 import dayjs, { Dayjs } from "dayjs";
 import GoogleMaps from "./MapComponent";
+import Header from "./Header";
 
 function App() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -25,14 +26,16 @@ function App() {
   return (
     <>
       <Grid container>
-        <Grid item xs={3.5}>
-          <ListView data={clusters} date={startDate} setDate={setStartDate}/>
+        <Grid item xs={12} md={3.5}>
+          <div className="left-side">
+            <Header setDate={setStartDate} date={startDate}/>
+            <ListView data={clusters}/>
+          </div>
         </Grid>
-        <Grid item xs={8.5}>
-          <div className="container">
+        <Grid item xs={12} md={8.5}>
+          <div className="right-side">
             <div className="map-image">
               <GoogleMaps data={clusters}/>
-              {/* <img src="https://i.stack.imgur.com/HILmr.png" /> */}
             </div>
           </div>
         </Grid>

@@ -73,3 +73,20 @@ export function getFlattenedData(locationData: Clusters){
 export function getPolylinesData(data: FlattenedData[]){
   return data.map(item => ( { lat: item.lat, lng: item.lng }))
 }
+
+
+export function getDuration(start_time: string, end_time: string) {
+  const date1 = dayjs(start_time);
+  const date2 = dayjs(end_time);
+  let duration = ""
+  if (date2.diff(date1, "hours")){
+    duration =  date2.diff(date1, "hours", true).toFixed(2).toString() + " hrs"
+  } else{
+    duration =  date2.diff(date1, "minutes", true).toFixed(2).toString() + " mins"
+  }
+
+  return `${duration} (${date1.format("hh:mm a")} - ${date2.format("hh:mm a")})`
+
+  // return formatedDate;
+
+}

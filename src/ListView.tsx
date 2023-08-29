@@ -1,23 +1,15 @@
 import List from "@mui/material/List";
-import Divider from "@mui/material/Divider";
 import SingleDetails from "./SingleDetails";
 import { colors } from "./constants";
-import DatePickerValue from "./DatePicker";
 import { Clusters } from "./types";
-import { Dayjs } from "dayjs";
 
 type Props = {
   data: Clusters | null,
-  date: Dayjs,
-  setDate: (date: Dayjs) => void
 }
-export default function ListView({data, date, setDate}: Props) {
+
+export default function ListView({data}: Props) {
   return (
-    <List sx={{ width: "100%", height: "100vh",overflowY:"scroll" , bgcolor: "background.paper" }}>
-      <div className="date-picker-container">
-        <DatePickerValue date={date} setDate={setDate} />
-      </div>
-      <Divider />
+    <List sx={{ height: "100%", overflowY:"scroll" , bgcolor: "background.paper", py: 0 }}>
       {data && data.map((item, index) => (
         <SingleDetails
           color={colors[index]}

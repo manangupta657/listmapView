@@ -3,9 +3,11 @@ import { Wrapper } from "@googlemaps/react-wrapper";
 import { useRef, useEffect, useState, useMemo, MouseEvent } from "react";
 import { createRoot } from "react-dom/client";
 import { Clusters } from "./types";
-import { getFlattenedData, getPolylinesData } from "./functionss";
+import { formatDate, getDuration, getFlattenedData, getPolylinesData } from "./functionss";
 import { Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
+import { AccessTime, LocationCity, LockClock, Place } from "@mui/icons-material";
+import { TimeClock } from "@mui/x-date-pickers";
 type Props = {
   data: Clusters | null;
 };
@@ -73,7 +75,7 @@ function Weather({ map, data }: WhetherProps) {
 
   return (
     <>
-      <PolyLine data={polyLinesData} map={map}/>
+      <PolyLine data={polyLinesData} map={map} />
       {flattenedData.map((item) => {
         const key = item.type === "halt" ? item.start_time : item.datetime;
         return (
@@ -81,33 +83,32 @@ function Weather({ map, data }: WhetherProps) {
             key={key}
             map={map}
             position={{ lat: item.lat, lng: item.lng }}
-            onClick={(e) => {
-              
-            }}
+            onClick={(e) => {}}
           >
             <Tooltip
               placement="top"
               title={
                 <div className="popper-container">
-                  <Typography>
-                    Address:{" "}
-                    <span className="popper-value">{item.address}</span>
-                  </Typography>
-                  {item.type === "halt" ? (
-                    <>
-                      <Typography sx={{ fontSize: "1rem" }}>
-                        Start Time: <span className="popper-value">{item.start_time}</span>
-                      </Typography>
-                      <Typography>
-                        End Time:{" "}
-                        <span className="popper-value">{item.end_time}</span>
-                      </Typography>
-                    </>
-                  ) : (
+                  <div className="popper-data">
+                    <Place />
                     <Typography>
-                      DateTime:{" "}
-                      <span className="popper-value">{item.datetime}</span>
+                      <span className="popper-value">{item.address}</span>
                     </Typography>
+                  </div>
+                  {item.type === "halt" ? (
+                       <div className="popper-data">
+                        <AccessTime />
+                        <Typography>
+                          <span className="popper-value"> {getDuration(item.start_time, item.end_time)}</span>
+                        </Typography>
+                      </div>
+                  ) : (
+                    <div className="popper-data">
+                    <AccessTime />
+                    <Typography>
+                      <span className="popper-value"> {formatDate(item.datetime)}</span>
+                    </Typography>
+                  </div>
                   )}
                 </div>
               }
@@ -178,13 +179,14 @@ function PolyLine({ map, data }) {
       strokeColor: "#000000",
       strokeOpacity: 1,
       strokeWeight: 1,
-      icons: [{
-        icon: {path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW},
-        offset: '100%',
-        repeat: '80px'
-      }]
-    }); 
-
+      icons: [
+        {
+          icon: { path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW },
+          offset: "100%",
+          repeat: "80px",
+        },
+      ],
+    });
 
     flightPath.setMap(map);
   }, [map, JSON.stringify(data)]);
