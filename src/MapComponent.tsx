@@ -1,23 +1,24 @@
 // @ts-nocheck
 import { Wrapper } from "@googlemaps/react-wrapper";
-import { useRef, useEffect, useState, useMemo } from "react";
+import { useRef, useEffect, useState, useMemo, MouseEvent } from "react";
 import { createRoot } from "react-dom/client";
 import { Clusters } from "./types";
 import { getFlattenedData } from "./functionss";
-
+import { Tooltip } from "@mui/material";
+import Typography from "@mui/material/Typography";
 type Props = {
-  data: Clusters | null
-}
-
-export default function GoogleMaps({data}: Props) {
-  console.log("data is", data)
+  data: Clusters | null;
+};
+// old key : AIzaSyCf2_txZACzBqNY99vHR1YWdbExpCuQ_Lg
+export default function GoogleMaps({ data }: Props) {
+  console.log("data is", data);
   return (
     <Wrapper
-      apiKey={"AIzaSyCf2_txZACzBqNY99vHR1YWdbExpCuQ_Lg"}
+      apiKey={"AIzaSyDf-xititY3lMRyp7rgDNxH_6h3YI3D1og"}
       version="beta"
       libraries={["marker"]}
     >
-      <MyMap data={data}/>
+      <MyMap data={data} />
     </Wrapper>
   );
 }
@@ -29,14 +30,17 @@ const mapOptions = {
   disableDefaultUI: true,
 };
 
-function MyMap({data}: Props) {
+function MyMap({ data }: Props) {
   const [map, setMap] = useState<google.maps.Map>();
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (data){
-      if (ref.current){
-        const center = { lat: data[0].lat, lng: data[0].lng }
-        const map = new window.google.maps.Map(ref.current, {...mapOptions, center})
+    if (data) {
+      if (ref.current) {
+        const center = { lat: data[0].lat, lng: data[0].lng };
+        const map = new window.google.maps.Map(ref.current, {
+          ...mapOptions,
+          center,
+        });
         setMap(map);
       }
     }
@@ -45,64 +49,87 @@ function MyMap({data}: Props) {
   return (
     <>
       <div ref={ref} id="map" />
-      {map && <Weather map={map} data={data}/>}
+      {map && <Weather map={map} data={data} />}
     </>
   );
 }
 
 type WhetherProps = {
   map: any;
-  data: Clusters | null
-}
+  data: Clusters | null;
+};
 
 function Weather({ map, data }: WhetherProps) {
   const [highlight, setHighlight] = useState("");
-  const [editing, setEditing] = useState();
 
   const flattenedData = useMemo(() => {
-    if (!data) return []
-    return  getFlattenedData(data)
-  }, [JSON.stringify(data)])
+    if (!data) return [];
+    return getFlattenedData(data);
+  }, [JSON.stringify(data)]);
 
-  
+
   return (
     <>
       {flattenedData.map((item) => {
-        const key = item.type === "halt" ? item.start_time : item.datetime
-        return <Marker
-          key={key}
-          map={map}
-          position={{ lat: item.lat, lng: item.lng }}
-          onClick={() => {}}
-        >
-          <div
-            className={`marker ${item.type} ${
-              highlight === key || editing === key ? "highlight" : ""
-            }`}
-            style={{background: item.color}}
-            onMouseEnter={() => setHighlight(key)}
-            onMouseLeave={() => setHighlight("")}
+        const key = item.type === "halt" ? item.start_time : item.datetime;
+        return (
+          <Marker
+            key={key}
+            map={map}
+            position={{ lat: item.lat, lng: item.lng }}
+            onClick={(e) => {
+              
+            }}
           >
-            {item.type ==="halt" ? item.id : null}
-          </div>
-        </Marker>
+            <Tooltip
+              placement="top"
+              title={
+                <div className="popper-container">
+                  <Typography>
+                    Address:{" "}
+                    <span className="popper-value">{item.address}</span>
+                  </Typography>
+                  {item.type === "halt" ? (
+                    <>
+                      <Typography sx={{ fontSize: "1rem" }}>
+                        Start Time: <span className="popper-value">{item.start_time}</span>
+                      </Typography>
+                      <Typography>
+                        End Time:{" "}
+                        <span className="popper-value">{item.end_time}</span>
+                      </Typography>
+                    </>
+                  ) : (
+                    <Typography>
+                      DateTime:{" "}
+                      <span className="popper-value">{item.datetime}</span>
+                    </Typography>
+                  )}
+                </div>
+              }
+              arrow
+              componentsProps={{
+                tooltip: {
+                  sx: {
+                    bgcolor: "common.white",
+                    color: "common.black",
+                    "& .MuiTooltip-arrow": {
+                      color: "common.white",
+                    },
+                  },
+                },
+              }}
+            >
+              <div
+                className={`marker ${item.type}`}
+                style={{ background: item.color }}
+              >
+                {item.type === "halt" ? item.id : null}
+              </div>
+            </Tooltip>
+          </Marker>
+        );
       })}
-      {/* {Object.entries(data).map(([key, weather]) => (
-        <Marker
-          key={key}
-          map={map}
-          position={weather.position}
-        >
-          <div
-            className={`marker ${weather.climate.toLowerCase()} ${
-              highlight === key || editing === key ? "highlight" : ""
-            }`}
-            onMouseEnter={() => setHighlight(key)}
-            onMouseLeave={() => setHighlight(null)}
-          >
-          </div>
-        </Marker>
-      ))} */}
     </>
   );
 }
@@ -122,7 +149,9 @@ function Marker({ map, position, children, onClick }) {
       });
     }
 
-    return () => {markerRef.current.map = null};
+    return () => {
+      markerRef.current.map = null;
+    };
   }, []);
 
   useEffect(() => {
@@ -133,5 +162,5 @@ function Marker({ map, position, children, onClick }) {
     return () => listener.remove();
   }, [map, position, children, onClick]);
 
-  return <></>
+  return <></>;
 }
