@@ -3,7 +3,7 @@ import { Wrapper } from "@googlemaps/react-wrapper";
 import { useRef, useEffect, useState, useMemo, MouseEvent } from "react";
 import { createRoot } from "react-dom/client";
 import { Clusters } from "./types";
-import { getFlattenedData } from "./functionss";
+import { getFlattenedData, getPolylinesData } from "./functionss";
 import { Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
 type Props = {
@@ -11,7 +11,6 @@ type Props = {
 };
 // old key : AIzaSyCf2_txZACzBqNY99vHR1YWdbExpCuQ_Lg
 export default function GoogleMaps({ data }: Props) {
-  console.log("data is", data);
   return (
     <Wrapper
       apiKey={"AIzaSyDf-xititY3lMRyp7rgDNxH_6h3YI3D1og"}
@@ -67,9 +66,14 @@ function Weather({ map, data }: WhetherProps) {
     return getFlattenedData(data);
   }, [JSON.stringify(data)]);
 
+  const polyLinesData = useMemo(() => {
+    if (!flattenedData.length) return [];
+    return getPolylinesData(flattenedData);
+  }, [JSON.stringify(flattenedData)]);
 
   return (
     <>
+      <PolyLine data={polyLinesData} map={map}/>
       {flattenedData.map((item) => {
         const key = item.type === "halt" ? item.start_time : item.datetime;
         return (
@@ -161,6 +165,23 @@ function Marker({ map, position, children, onClick }) {
     const listener = markerRef.current.addListener("click", onClick);
     return () => listener.remove();
   }, [map, position, children, onClick]);
+
+  return <></>;
+}
+function PolyLine({ map, data }) {
+  const polyRef = useRef();
+
+  useEffect(() => {
+    const flightPath = new google.maps.Polyline({
+      path: data,
+      geodesic: true,
+      strokeColor: "#000000",
+      strokeOpacity: 0.8,
+      strokeWeight: 0.6,
+    });
+  
+    flightPath.setMap(map);
+  }, [map, JSON.stringify(data)]);
 
   return <></>;
 }
