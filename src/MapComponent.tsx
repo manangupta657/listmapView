@@ -1,7 +1,8 @@
+// @ts-nocheck
 import { Wrapper } from "@googlemaps/react-wrapper";
 import { useRef, useEffect, useState, useMemo } from "react";
 import { createRoot } from "react-dom/client";
-import { Clusters, FlattenedData } from "./types";
+import { Clusters } from "./types";
 import { getFlattenedData } from "./functionss";
 
 type Props = {
@@ -30,7 +31,7 @@ const mapOptions = {
 
 function MyMap({data}: Props) {
   const [map, setMap] = useState<google.maps.Map>();
-  const ref = useRef<HTMLElement>();
+  const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (data){
       if (ref.current){
@@ -66,12 +67,13 @@ function Weather({ map, data }: WhetherProps) {
   
   return (
     <>
-      {flattenedData.map((item, index) => {
+      {flattenedData.map((item) => {
         const key = item.type === "halt" ? item.start_time : item.datetime
         return <Marker
           key={key}
           map={map}
           position={{ lat: item.lat, lng: item.lng }}
+          onClick={() => {}}
         >
           <div
             className={`marker ${item.type} ${
@@ -106,6 +108,7 @@ function Weather({ map, data }: WhetherProps) {
 }
 
 function Marker({ map, position, children, onClick }) {
+  // @ts-ignore
   const rootRef = useRef();
   const markerRef = useRef();
 
@@ -113,14 +116,13 @@ function Marker({ map, position, children, onClick }) {
     if (!rootRef.current) {
       const container = document.createElement("div");
       rootRef.current = createRoot(container);
-
       markerRef.current = new google.maps.marker.AdvancedMarkerView({
         position,
         content: container,
       });
     }
 
-    return () => (markerRef.current.map = null);
+    return () => {markerRef.current.map = null};
   }, []);
 
   useEffect(() => {
@@ -130,4 +132,6 @@ function Marker({ map, position, children, onClick }) {
     const listener = markerRef.current.addListener("click", onClick);
     return () => listener.remove();
   }, [map, position, children, onClick]);
+
+  return <></>
 }
