@@ -15,3 +15,19 @@ export interface RouteToNextCluster {
   lng: number
   address: string
 }
+
+export type FlattenedData = {
+  lat: number;
+  lng: number;
+  address: string;
+  color: string;
+} & ({
+  type: "halt",
+  start_time: string;
+  end_time: string;
+  id: number
+} | {
+  type: "route",
+  datetime: string;
+}
+)

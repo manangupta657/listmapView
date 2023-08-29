@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Clusters } from "./types";
 import { getClusters } from "./functionss";
 import dayjs, { Dayjs } from "dayjs";
-import MyMap from "./MapComponent";
+import GoogleMaps from "./MapComponent";
 
 function App() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -31,7 +31,7 @@ function App() {
         <Grid item xs={8.5}>
           <div className="container">
             <div className="map-image">
-              <MyMap />
+              <GoogleMaps data={clusters}/>
               {/* <img src="https://i.stack.imgur.com/HILmr.png" /> */}
             </div>
           </div>

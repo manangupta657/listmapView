@@ -1,5 +1,7 @@
 import axios from "axios";
 import dayjs from "dayjs";
+import { Clusters, FlattenedData } from "./types";
+import { colors } from "./constants";
 export function formatDate(date: string) {
   const formatedDate = dayjs(date).format("hh:mm a")
   return formatedDate;
@@ -36,3 +38,34 @@ export async function getClusters(date: string, searchParams: URLSearchParams) {
 }
 
 //2023-07-24
+
+export function getFlattenedData(locationData: Clusters){
+  const flattenedData: FlattenedData[] = locationData.reduce((accumulator, currentLocation, index) => {
+    const flatRouteData: FlattenedData[] = currentLocation.route_to_next_cluster.map(
+      (step) => ({
+        lat: step.lat,
+        lng: step.lng,
+        address: step.address,
+        type: "route",
+        color: colors[index],
+        datetime: step.datetime1,
+      })
+    );
+  
+    const flatHalt: FlattenedData = {
+        lat: currentLocation.lat,
+        lng: currentLocation.lng,
+        address: currentLocation.address,
+        type: "halt",
+        color: colors[index],
+        start_time: currentLocation.start_time,
+        end_time: currentLocation.end_time,
+        id: index + 1
+    }
+        
+  
+    return [...accumulator, flatHalt, ...flatRouteData]
+  }, [] as FlattenedData[]);
+
+  return flattenedData
+}

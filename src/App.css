@@ -50,14 +50,14 @@
   width: 20px;
   height: 20px;
   font-family: "Roboto","Helvetica","Arial",sans-serif;
-  font-size: 0.75rem;
+  font-size: 1rem;
   line-height: 1;
   border-radius: 50%;
   overflow: hidden;
   user-select: none;
   color: #fff;
   background-color: #bdbdbd;
-  background: #512B81;
+  /* background: #512B81; */
 }
 /* .marker {
   height: 16px;
@@ -67,10 +67,10 @@
 } */
 
 .marker.halt{
-  width: 30px;
-  height: 30px;
+  width: 20px;
+  height: 20px;
 }
 .marker.route{
-  width: 15px;
-  height: 15px;
+  width: 8px;
+  height: 8px;
 }
