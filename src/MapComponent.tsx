@@ -176,10 +176,16 @@ function PolyLine({ map, data }) {
       path: data,
       geodesic: true,
       strokeColor: "#000000",
-      strokeOpacity: 0.8,
-      strokeWeight: 0.6,
-    });
-  
+      strokeOpacity: 1,
+      strokeWeight: 1,
+      icons: [{
+        icon: {path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW},
+        offset: '100%',
+        repeat: '80px'
+      }]
+    }); 
+
+
     flightPath.setMap(map);
   }, [map, JSON.stringify(data)]);
 
