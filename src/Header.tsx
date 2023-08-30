@@ -9,13 +9,14 @@ type Props = {
   setDate: (date: Dayjs) => void;
   listMode: boolean;
   setListMode: (mode: boolean) => void;
+  name: string
 };
 
-export default function Header({ date, setDate, listMode, setListMode }: Props) {
+export default function Header({ date, setDate, listMode, setListMode, name }: Props) {
   return (
     <>
       <div className="date-picker-container">
-        <DatePickerValue date={date} setDate={setDate} />
+        <DatePickerValue date={date} setDate={setDate} name={name}/>
         <div className="switch-button">
           <IconButton size="medium" onClick={()=>{ setListMode(!listMode)}}>
           {listMode ? <MapOutlinedIcon sx={{ fontSize: "35px" }} /> : <FormatListBulletedOutlinedIcon sx={{ fontSize: "35px" }}/>}

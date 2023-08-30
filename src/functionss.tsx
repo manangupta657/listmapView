@@ -34,7 +34,7 @@ export async function getClusters(date: string, searchParams: URLSearchParams) {
   }
 
   const response = await axios.get(requestUrl);
-  return response?.data?.response?.data
+  return response?.data
 }
 
 //2023-07-24
@@ -82,7 +82,7 @@ export function getDuration(start_time: string, end_time: string) {
   if (date2.diff(date1, "hours")){
     duration =  date2.diff(date1, "hours", true).toFixed(2).toString() + " hrs"
   } else{
-    duration =  date2.diff(date1, "minutes", true).toFixed(2).toString() + " mins"
+    duration =  date2.diff(date1, "minutes", true).toFixed(0).toString() + " mins"
   }
 
   return `${duration} (${date1.format("hh:mm a")} - ${date2.format("hh:mm a")})`

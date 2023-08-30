@@ -15,6 +15,7 @@ function App() {
   const dateParams = urlParams.get("date");
   const viewParam = urlParams.get("view");
   const [clusters, setClusters] = useState<Clusters | null>(null);
+  const [name, setName] = useState("");
   const [startDate, setStartDate] = useState<Dayjs>(
     dayjs(dateParams || undefined)
   );
@@ -25,19 +26,20 @@ function App() {
 
   useEffect(() => {
     async function getData() {
-      const data = await getClusters(formattedDate, urlParams);
-      setClusters(data);
+      const response = await getClusters(formattedDate, urlParams);
+      setClusters(response?.response?.data);
+      setName(response?.msg);
+      console.log(response)
     }
     getData();
   }, [formattedDate]);
-
   return (
     <>
       <Grid container>
         
           <Grid item xs={12} sm={3.5}>
             <div className="left-side">
-              <Header setDate={setStartDate} date={startDate} listMode={listMode} setListMode={setListMode} />
+              <Header setDate={setStartDate} date={startDate} listMode={listMode} setListMode={setListMode} name={name}/>
               {( matches || listMode ) ? ( <ListView data={clusters} /> ) : (<GoogleMaps data={clusters} />)}
             </div>
           </Grid>
