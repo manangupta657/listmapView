@@ -1,7 +1,3 @@
-.map-image{
-  position: absolute;
-  width: 100%;
-}
 .left-side{
   height: 100vh;
   padding-top: 10px;
@@ -12,6 +8,9 @@
   width: 100%;
   height: 100vh;
   position: relative;
+}
+.switch-button{
+  display: none;
 }
 
 .date-picker-container{
@@ -24,15 +23,6 @@
 
 .MuiTimelineItem-root{
   min-height: 50px !important;
-}
-
-.directions {
-  position: absolute;
-  background: black;
-  top: 1rem;
-  right: 1rem;
-  width: 25%;
-  padding: 1rem;
 }
 
 #map {
@@ -56,15 +46,7 @@
   user-select: none;
   color: #fff;
   background-color: #bdbdbd;
-
-  /* background: #512B81; */
 }
-/* .marker {
-  height: 16px;
-  width: 16px;
-  border-radius: 50%;
-  background-color: black;
-} */
 
 .marker.halt{
   width: 20px;
@@ -87,4 +69,19 @@
   gap: 5px;
   margin-top: 10px;
   margin-bottom: 10px;
+}
+
+
+@media (max-width: 600px) {
+  .date-picker-container{
+    justify-content: space-between;
+    padding-left: 5px;
+    padding-right: 5px;
+
+  }
+
+  .switch-button{
+    display: block;
+  }
+  
 }

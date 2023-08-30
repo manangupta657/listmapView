@@ -8,6 +8,7 @@ import { Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import { AccessTime, LocationCity, LockClock, Place } from "@mui/icons-material";
 import { TimeClock } from "@mui/x-date-pickers";
+import FmdGoodOutlinedIcon from '@mui/icons-material/FmdGoodOutlined';
 type Props = {
   data: Clusters | null;
 };
@@ -35,7 +36,7 @@ function MyMap({ data }: Props) {
   const [map, setMap] = useState<google.maps.Map>();
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (data) {
+    if (data && data.length > 0) {
       if (ref.current) {
         const center = { lat: data[0].lat, lng: data[0].lng };
         const map = new window.google.maps.Map(ref.current, {
@@ -90,7 +91,8 @@ function Weather({ map, data }: WhetherProps) {
               title={
                 <div className="popper-container">
                   <div className="popper-data">
-                    <Place />
+                    {/* <Place /> */}
+                    <FmdGoodOutlinedIcon />
                     <Typography>
                       <span className="popper-value">{item.address}</span>
                     </Typography>
@@ -113,6 +115,7 @@ function Weather({ map, data }: WhetherProps) {
                 </div>
               }
               arrow
+              disableFocusListener
               componentsProps={{
                 tooltip: {
                   sx: {
