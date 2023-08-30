@@ -4,7 +4,6 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { ArrowLeftIcon, ArrowRightIcon } from "@mui/x-date-pickers";
 import { IconButton, Stack } from "@mui/material";
-import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 
 export default function DatePickerValue({date, setDate, name}: any) {
 

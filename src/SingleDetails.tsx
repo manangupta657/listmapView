@@ -8,7 +8,7 @@ import BasicTimeline from "./TimeLine";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Avatar from "@mui/material/Avatar";
 import Stack from "@mui/material/Stack";
-import { RouteToNextCluster } from "./types";
+import { Cluster, RouteToNextCluster } from "./types";
 import { formatDate } from "./functionss";
 
 type Props = {
@@ -17,13 +17,21 @@ type Props = {
   startTime: string;
   endTime: string;
   id: number;
-  routes: RouteToNextCluster[]
+  routes: RouteToNextCluster[];
+  setActiveCluster: (cluster: Cluster | null) => void;
+  cluster: Cluster
 }
 
 export default function SingleDetails(props: Props) {
   const [open, setOpen] = React.useState(false);
 
   const handleClick = () => {
+    if (open){
+      props.setActiveCluster(null)
+    }
+    else{
+      props.setActiveCluster(props.cluster)
+    }
     setOpen(!open);
   };
 

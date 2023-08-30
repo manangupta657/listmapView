@@ -2,7 +2,7 @@ import Grid from "@mui/material/Grid";
 import "./App.css";
 import ListView from "./ListView";
 import { useEffect, useState } from "react";
-import { Clusters } from "./types";
+import { Cluster, Clusters } from "./types";
 import { getClusters } from "./functionss";
 import dayjs, { Dayjs } from "dayjs";
 import GoogleMaps from "./MapComponent";
@@ -22,7 +22,8 @@ function App() {
   const formattedDate = dayjs(startDate).format("YYYY-MM-DD");
   const theme = useTheme();
   const matches = useMediaQuery(theme.breakpoints.up("sm"));
-  const [listMode, setListMode] = useState(viewParam === "map" ? false : true)
+  const [listMode, setListMode] = useState(viewParam === "map" ? false : true);
+  const [activeCluster, setActiveCluster] = useState<Cluster | null>(null)
 
   useEffect(() => {
     async function getData() {
@@ -40,14 +41,14 @@ function App() {
           <Grid item xs={12} sm={3.5}>
             <div className="left-side">
               <Header setDate={setStartDate} date={startDate} listMode={listMode} setListMode={setListMode} name={name}/>
-              {( matches || listMode ) ? ( <ListView data={clusters} /> ) : (<GoogleMaps data={clusters} />)}
+              {( matches || listMode ) ? ( <ListView data={clusters} setActiveCluster={setActiveCluster}/> ) : (<GoogleMaps data={clusters} activeCluster={activeCluster}/>)}
             </div>
           </Grid>
         
         {matches ? (
           <Grid item xs={12} sm={8.5}>
             <div className="right-side">
-              <GoogleMaps data={clusters} />
+              <GoogleMaps data={clusters} activeCluster={activeCluster} />
             </div>
           </Grid>
         ) : null}

@@ -2,7 +2,7 @@
 import { Wrapper } from "@googlemaps/react-wrapper";
 import { useRef, useEffect, useState, useMemo, MouseEvent } from "react";
 import { createRoot } from "react-dom/client";
-import { Clusters } from "./types";
+import { Cluster, Clusters } from "./types";
 import { formatDate, getDuration, getFlattenedData, getPolylinesData } from "./functionss";
 import { Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
@@ -11,16 +11,17 @@ import { TimeClock } from "@mui/x-date-pickers";
 import FmdGoodOutlinedIcon from '@mui/icons-material/FmdGoodOutlined';
 type Props = {
   data: Clusters | null;
+  activeCluster: Cluster | null;
 };
 // old key : AIzaSyCf2_txZACzBqNY99vHR1YWdbExpCuQ_Lg
-export default function GoogleMaps({ data }: Props) {
+export default function GoogleMaps({ data, activeCluster}: Props) {
   return (
     <Wrapper
       apiKey={"AIzaSyDf-xititY3lMRyp7rgDNxH_6h3YI3D1og"}
       version="beta"
       libraries={["marker"]}
     >
-      <MyMap data={data} />
+      <MyMap data={data} activeCluster={activeCluster} />
     </Wrapper>
   );
 }
@@ -30,9 +31,11 @@ const mapOptions = {
   center: { lat: 24.6628595, lng: 77.3348837 },
   zoom: 10,
   disableDefaultUI: true,
+  zoomControl: true,
+  scaleControl: true,
 };
 
-function MyMap({ data }: Props) {
+function MyMap({ data, activeCluster }: Props) {
   const [map, setMap] = useState<google.maps.Map>();
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -47,6 +50,17 @@ function MyMap({ data }: Props) {
       }
     }
   }, [JSON.stringify(data)]);
+
+  useEffect(() => {
+    if (activeCluster && map){
+      // map.setCenter({ lat: activeCluster.lat, lng: activeCluster.lng })
+        const bounds = new google.maps.LatLngBounds();
+        bounds.extend({ lat: activeCluster.lat, lng: activeCluster.lng});
+        map.fitBounds(bounds);
+        map.setZoom(12);
+    }
+    
+  }, [JSON.stringify(activeCluster)])
 
   return (
     <>
