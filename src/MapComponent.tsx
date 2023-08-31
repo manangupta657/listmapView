@@ -100,6 +100,7 @@ function Weather({ map, data }: WhetherProps) {
     })
     return timeString;
   }
+  
 
   return (
     <>
