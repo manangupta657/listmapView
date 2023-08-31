@@ -34,6 +34,10 @@ function App() {
     }
     getData();
   }, [formattedDate]);
+
+  useEffect(() => {
+    document.title = `Locations: ${name} - ${startDate ? startDate.format("DD/MM/YYYY") : ""}`
+  }, [name, startDate.format("DD/MM/YYYY")])
   return (
     <>
       <Grid container>

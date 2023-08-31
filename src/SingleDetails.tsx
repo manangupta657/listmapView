@@ -9,7 +9,7 @@ import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Avatar from "@mui/material/Avatar";
 import Stack from "@mui/material/Stack";
 import { Cluster, RouteToNextCluster } from "./types";
-import { formatDate } from "./functionss";
+import { formatDuration } from "./functionss";
 
 type Props = {
   color: string;
@@ -45,7 +45,7 @@ export default function SingleDetails(props: Props) {
           primary={props.label}
           secondary={
             <Stack direction="row">
-              {`${formatDate(props.startTime)} - ${formatDate(props.endTime)}`}
+              {formatDuration(props.startTime, props.endTime)}
             </Stack>
           }
         />

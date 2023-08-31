@@ -7,6 +7,18 @@ export function formatDate(date: string) {
   return formatedDate;
 }
 
+export function formatDuration(start_time: string, end_time: string) {
+  const date1 = dayjs(start_time).format("hh:mm a");
+  const date2 = dayjs(end_time).format("hh:mm a");
+
+  if (date1 === date2){
+    return date1
+  }
+  else{
+    return `${date1} - ${date2}`
+  }
+}
+
 export async function getClusters(date: string, searchParams: URLSearchParams) {
   const id = searchParams.get("id")
   const token = searchParams.get("token")
@@ -82,7 +94,12 @@ export function getDuration(start_time: string, end_time: string) {
   if (date2.diff(date1, "hours")){
     duration =  date2.diff(date1, "hours", true).toFixed(2).toString() + " hrs"
   } else{
-    duration =  date2.diff(date1, "minutes", true).toFixed(0).toString() + " mins"
+    if (date2.diff(date1, "minutes", true) < 1){
+      return date1.format("hh:mm a")
+    }
+    else{
+      duration =  date2.diff(date1, "minutes", true).toFixed(0).toString() + " mins"
+    }
   }
 
   return `${duration} (${date1.format("hh:mm a")} - ${date2.format("hh:mm a")})`
