@@ -14,7 +14,7 @@ type Props = {
   activeCluster: Cluster | null;
 };
 // old key : AIzaSyCf2_txZACzBqNY99vHR1YWdbExpCuQ_Lg
-export default function GoogleMaps({ data, activeCluster}: Props) {
+export default function GoogleMaps({ data, activeCluster }: Props) {
   return (
     <Wrapper
       apiKey={"AIzaSyDf-xititY3lMRyp7rgDNxH_6h3YI3D1og"}
@@ -52,14 +52,14 @@ function MyMap({ data, activeCluster }: Props) {
   }, [JSON.stringify(data)]);
 
   useEffect(() => {
-    if (activeCluster && map){
+    if (activeCluster && map) {
       // map.setCenter({ lat: activeCluster.lat, lng: activeCluster.lng })
-        const bounds = new google.maps.LatLngBounds();
-        bounds.extend({ lat: activeCluster.lat, lng: activeCluster.lng});
-        map.fitBounds(bounds);
-        map.setZoom(12);
+      const bounds = new google.maps.LatLngBounds();
+      bounds.extend({ lat: activeCluster.lat, lng: activeCluster.lng });
+      map.fitBounds(bounds);
+      map.setZoom(12);
     }
-    
+
   }, [JSON.stringify(activeCluster)])
 
   return (
@@ -88,6 +88,19 @@ function Weather({ map, data }: WhetherProps) {
     return getPolylinesData(flattenedData);
   }, [JSON.stringify(flattenedData)]);
 
+  const CheckTimeAppend = (item) => {
+    let timeString = formatDate(item.datetime);
+
+    flattenedData.forEach(mapData => {
+      if ((item.lat === mapData.lat) && (item.lng === mapData.lng)) {
+        if (formatDate(item.datetime) != formatDate(mapData.datetime)) {
+          timeString += ', ' + formatDate(mapData.datetime);
+        }
+      }
+    })
+    return timeString;
+  }
+
   return (
     <>
       <PolyLine data={polyLinesData} map={map} />
@@ -98,7 +111,7 @@ function Weather({ map, data }: WhetherProps) {
             key={key}
             map={map}
             position={{ lat: item.lat, lng: item.lng }}
-            onClick={(e) => {}}
+            onClick={(e) => { }}
           >
             <Tooltip
               placement="top"
@@ -112,19 +125,19 @@ function Weather({ map, data }: WhetherProps) {
                     </Typography>
                   </div>
                   {item.type === "halt" ? (
-                       <div className="popper-data">
-                        <AccessTime />
-                        <Typography>
-                          <span className="popper-value"> {getDuration(item.start_time, item.end_time)}</span>
-                        </Typography>
-                      </div>
+                    <div className="popper-data">
+                      <AccessTime />
+                      <Typography>
+                        <span className="popper-value"> {getDuration(item.start_time, item.end_time)}</span>
+                      </Typography>
+                    </div>
                   ) : (
                     <div className="popper-data">
-                    <AccessTime />
-                    <Typography>
-                      <span className="popper-value"> {formatDate(item.datetime)}</span>
-                    </Typography>
-                  </div>
+                      <AccessTime />
+                      <Typography>
+                        <span className="popper-value"> {CheckTimeAppend(item)}</span>
+                      </Typography>
+                    </div>
                   )}
                 </div>
               }
