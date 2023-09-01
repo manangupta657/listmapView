@@ -89,12 +89,14 @@ function Weather({ map, data }: WhetherProps) {
   }, [JSON.stringify(flattenedData)]);
 
   const CheckTimeAppend = (item) => {
-    let timeString = formatDate(item.datetime);
+    let timeString;
 
     flattenedData.forEach(mapData => {
       if ((item.lat === mapData.lat) && (item.lng === mapData.lng)) {
-        if (formatDate(item.datetime) != formatDate(mapData.datetime)) {
+        if (timeString) {
           timeString += ', ' + formatDate(mapData.datetime);
+        }else{
+          timeString=formatDate(mapData.datetime);
         }
       }
     })
