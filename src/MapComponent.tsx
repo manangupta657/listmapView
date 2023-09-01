@@ -17,7 +17,7 @@ type Props = {
 export default function GoogleMaps({ data, activeCluster }: Props) {
   return (
     <Wrapper
-      apiKey={"AIzaSyCf2_txZACzBqNY99vHR1YWdbExpCuQ_Lg"}
+      apiKey={"AIzaSyDf-xititY3lMRyp7rgDNxH_6h3YI3D1og"}
       version="beta"
       libraries={["marker"]}
     >
