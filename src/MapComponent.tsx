@@ -205,22 +205,29 @@ function PolyLine({ map, data }) {
   const polyRef = useRef();
 
   useEffect(() => {
-    const flightPath = new google.maps.Polyline({
-      path: data,
-      geodesic: true,
-      strokeColor: "#000000",
-      strokeOpacity: 1,
-      strokeWeight: 1,
-      icons: [
-        {
-          icon: { path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW },
-          offset: "100%",
-          repeat: "80px",
-        },
-      ],
-    });
-
-    flightPath.setMap(map);
+    console.log("daerflhejf", data)
+    if (data.length === 0){
+      const flightPath = new google.maps.Polyline();
+      flightPath.setMap(map);
+    }
+    else{
+      const flightPath = new google.maps.Polyline({
+        path: data,
+        geodesic: true,
+        strokeColor: "#000000",
+        strokeOpacity: 1,
+        strokeWeight: 1,
+        icons: [
+          {
+            icon: { path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW },
+            offset: "100%",
+            repeat: "80px",
+          },
+        ],
+      });
+  
+      flightPath.setMap(map);
+    }
   }, [map, JSON.stringify(data)]);
 
   return <></>;
