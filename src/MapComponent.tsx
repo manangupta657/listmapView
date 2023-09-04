@@ -29,7 +29,7 @@ export default function GoogleMaps({ data, activeCluster }: Props) {
 const mapOptions = {
   mapId: "DEMO_MAP_ID",
   center: { lat: 24.6628595, lng: 77.3348837 },
-  zoom: 10,
+  zoom: 12,
   disableDefaultUI: true,
   zoomControl: true,
   scaleControl: true,
@@ -57,7 +57,7 @@ function MyMap({ data, activeCluster }: Props) {
       const bounds = new google.maps.LatLngBounds();
       bounds.extend({ lat: activeCluster.lat, lng: activeCluster.lng });
       map.fitBounds(bounds);
-      map.setZoom(12);
+      map.setZoom(15);
     }
 
   }, [JSON.stringify(activeCluster)])
