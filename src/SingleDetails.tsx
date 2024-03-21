@@ -1,14 +1,16 @@
 import * as React from "react";
-import ListItemText from "@mui/material/ListItemText";
-import Divider from "@mui/material/Divider";
-import Collapse from "@mui/material/Collapse";
-import ListItemButton from "@mui/material/ListItemButton";
-import { ExpandLess, ExpandMore } from "@mui/icons-material";
-import BasicTimeline from "./TimeLine";
-import ListItemAvatar from "@mui/material/ListItemAvatar";
-import Avatar from "@mui/material/Avatar";
-import Stack from "@mui/material/Stack";
+
 import { Cluster, RouteToNextCluster } from "./types";
+import { ExpandLess, ExpandMore } from "@mui/icons-material";
+
+import Avatar from "@mui/material/Avatar";
+import BasicTimeline from "./TimeLine";
+import Collapse from "@mui/material/Collapse";
+import Divider from "@mui/material/Divider";
+import ListItemAvatar from "@mui/material/ListItemAvatar";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemText from "@mui/material/ListItemText";
+import Stack from "@mui/material/Stack";
 import { formatDuration } from "./functionss";
 
 type Props = {
@@ -26,10 +28,10 @@ export default function SingleDetails(props: Props) {
   const [open, setOpen] = React.useState(false);
 
   const handleClick = () => {
-    if (open){
+    if (open) {
       props.setActiveCluster(null)
     }
-    else{
+    else {
       props.setActiveCluster(props.cluster)
     }
     setOpen(!open);
@@ -49,12 +51,12 @@ export default function SingleDetails(props: Props) {
             </Stack>
           }
         />
-        {open ? <ExpandLess /> : <ExpandMore />}
+        {props.routes.length > 0 && (open ? <ExpandLess /> : <ExpandMore />)}
       </ListItemButton>
 
-      <Collapse in={open} timeout="auto" unmountOnExit>
+      {props.routes.length > 0 && <Collapse in={open} timeout="auto" unmountOnExit>
         <BasicTimeline routes={props.routes} color={props.color} />
-      </Collapse>
+      </Collapse>}
       <Divider />
     </>
   );

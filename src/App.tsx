@@ -1,12 +1,15 @@
-import Grid from "@mui/material/Grid";
 import "./App.css";
-import ListView from "./ListView";
-import { useEffect, useState } from "react";
+
 import { Cluster, Clusters } from "./types";
-import { getClusters } from "./functionss";
 import dayjs, { Dayjs } from "dayjs";
+import { useEffect, useState } from "react";
+
 import GoogleMaps from "./MapComponent";
+import Grid from "@mui/material/Grid";
 import Header from "./Header";
+import ListView from "./ListView";
+import { getClusters } from "./functionss";
+import { transformClusterData } from "./utils/transform";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 
@@ -28,9 +31,8 @@ function App() {
   useEffect(() => {
     async function getData() {
       const response = await getClusters(formattedDate, urlParams);
-      setClusters(response?.response?.data);
+      setClusters(transformClusterData(response?.response?.data));
       setName(response?.msg);
-      console.log(response)
     }
     getData();
   }, [formattedDate]);

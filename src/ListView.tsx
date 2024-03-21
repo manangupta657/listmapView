@@ -1,8 +1,9 @@
+import { Cluster, Clusters } from "./types";
+
 import List from "@mui/material/List";
 import SingleDetails from "./SingleDetails";
-import { colors } from "./constants";
-import { Cluster, Clusters } from "./types";
 import { Typography } from "@mui/material";
+import { colors } from "./constants";
 
 type Props = {
   data: Clusters | null;

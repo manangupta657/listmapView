@@ -1,14 +1,15 @@
-// @ts-nocheck
-import { Wrapper } from "@googlemaps/react-wrapper";
-import { useRef, useEffect, useState, useMemo, MouseEvent } from "react";
-import { createRoot } from "react-dom/client";
 import { Cluster, Clusters } from "./types";
 import { formatDate, getDuration, getFlattenedData, getPolylinesData } from "./functionss";
+import { useEffect, useMemo, useRef, useState } from "react";
+
+import { AccessTime } from "@mui/icons-material";
+import FmdGoodOutlinedIcon from '@mui/icons-material/FmdGoodOutlined';
 import { Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
-import { AccessTime, LocationCity, LockClock, Place } from "@mui/icons-material";
-import { TimeClock } from "@mui/x-date-pickers";
-import FmdGoodOutlinedIcon from '@mui/icons-material/FmdGoodOutlined';
+// @ts-nocheck
+import { Wrapper } from "@googlemaps/react-wrapper";
+import { createRoot } from "react-dom/client";
+
 type Props = {
   data: Clusters | null;
   activeCluster: Cluster | null;
@@ -88,10 +89,10 @@ function Weather({ map, data }: WhetherProps) {
     return getPolylinesData(flattenedData);
   }, [JSON.stringify(flattenedData)]);
 
-  const CheckTimeAppend = (item) => {
-    let timeString;
+  const CheckTimeAppend = (item:any) => {
+    let timeString: string;
 
-    flattenedData.forEach(mapData => {
+    flattenedData.forEach((mapData:any) => {
       if ((item.lat === mapData.lat) && (item.lng === mapData.lng)) {
         if (timeString) {
           timeString += ', ' + formatDate(mapData.datetime);
@@ -205,7 +206,6 @@ function PolyLine({ map, data }) {
   const polyRef = useRef();
 
   useEffect(() => {
-    console.log("daerflhejf", data)
     if (data.length === 0){
       const flightPath = new google.maps.Polyline();
       flightPath.setMap(map);
