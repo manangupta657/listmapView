@@ -2,7 +2,7 @@ import { Cluster, Clusters } from "./types";
 
 import List from "@mui/material/List";
 import SingleDetails from "./SingleDetails";
-import { Typography } from "@mui/material";
+import { ListItemAvatar, ListItemButton, ListItemText, Skeleton, Typography } from "@mui/material";
 import { colors } from "./constants";
 
 type Props = {
@@ -20,8 +20,8 @@ export default function ListView({ data, setActiveCluster }: Props) {
         py: 0,
       }}
     >
-      {data &&
-        data.map((item, index) => (
+      {
+        data ?  data.map((item, index) => (
           <SingleDetails
             color={colors[index]}
             label={item.address}
@@ -32,11 +32,42 @@ export default function ListView({ data, setActiveCluster }: Props) {
             setActiveCluster={setActiveCluster}
             cluster={item}
           />
-        ))}
+        )) : <>
+        <SkeletonLoading/>
+        <SkeletonLoading/>
+        <SkeletonLoading/>
+        <SkeletonLoading/>
+        <SkeletonLoading/>
+      </>
+      }
 
       {data && data.length === 0 ? (
         <Typography className="no-location">No locations tracked on this date</Typography>
       ) : null}
     </List>
   );
+}
+
+export function SkeletonLoading(){
+  return  <ListItemButton >
+    <ListItemAvatar>
+      <Skeleton animation="wave" variant="circular" width={40} height={40} />
+    </ListItemAvatar>
+    <ListItemText
+      primary={ <Skeleton
+        animation="wave"
+        width="80%"
+        height={24}
+ 
+      />}
+      secondary={
+        <Skeleton
+        animation="wave"
+        height={16}
+        width="60%"
+      />
+      }
+    />
+    
+  </ListItemButton>
 }

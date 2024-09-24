@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { AccessTime } from "@mui/icons-material";
 import FmdGoodOutlinedIcon from '@mui/icons-material/FmdGoodOutlined';
-import { Tooltip } from "@mui/material";
+import { Box, CircularProgress, Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
 // @ts-nocheck
 import { Wrapper } from "@googlemaps/react-wrapper";
@@ -21,6 +21,7 @@ export default function GoogleMaps({ data, activeCluster }: Props) {
       apiKey={"AIzaSyCXmuZgrN0tJsciGtndwNGsBDT5lISv3bM"}
       version="beta"
       libraries={["marker"]}
+      
     >
       <MyMap data={data} activeCluster={activeCluster} />
     </Wrapper>
@@ -66,7 +67,23 @@ function MyMap({ data, activeCluster }: Props) {
   return (
     <>
       <div ref={ref} id="map" />
-      {map && <Weather map={map} data={data} />}
+      {/* {map && <Weather map={map} data={data} />} */}
+      {map ? <Weather map={map} data={data} /> :  <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(255, 255, 255, 0.8)', 
+            zIndex: 1000,
+          }}
+        >
+          <CircularProgress />
+        </Box>}
     </>
   );
 }
