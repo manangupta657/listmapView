@@ -13,6 +13,7 @@ import { createRoot } from "react-dom/client";
 type Props = {
   data: Clusters | null;
   activeCluster: Cluster | null;
+  apiInProgress: boolean
 };
 
 const WeatherComponentStyle = {
@@ -28,7 +29,7 @@ const WeatherComponentStyle = {
   zIndex: 1000,
 }
 // old key : AIzaSyCf2_txZACzBqNY99vHR1YWdbExpCuQ_Lg
-export default function GoogleMaps({ data, activeCluster }: Props) {
+export default function GoogleMaps({ data, activeCluster, apiInProgress }: Props) {
   return (
     <Wrapper
       apiKey={"AIzaSyCXmuZgrN0tJsciGtndwNGsBDT5lISv3bM"}
@@ -36,7 +37,7 @@ export default function GoogleMaps({ data, activeCluster }: Props) {
       libraries={["marker"]}
 
     >
-      <MyMap data={data} activeCluster={activeCluster} />
+      <MyMap apiInProgress={apiInProgress} data={data} activeCluster={activeCluster} />
     </Wrapper>
   );
 }
@@ -50,11 +51,9 @@ const mapOptions = {
   scaleControl: true,
 };
 
-function MyMap({ data, activeCluster }: Props) {
+function MyMap({ data, activeCluster, apiInProgress }: Props) {
   const [map, setMap] = useState<google.maps.Map>();
   const ref = useRef<HTMLDivElement>(null);
-
-  const noDataAvailableInResponse = data?.length === 0
   useEffect(() => {
     if (data && data.length > 0) {
       if (ref.current) {
@@ -79,12 +78,19 @@ function MyMap({ data, activeCluster }: Props) {
 
   }, [JSON.stringify(activeCluster)])
 
+  if (apiInProgress) {
+    return <Box sx={WeatherComponentStyle}>
+      <CircularProgress />
+    </Box>
+  }
+
   return (
     <>
+      {
+        !map ? <Typography className="no-location">No locations tracked on this date</Typography> : <></>
+      }
       <div ref={ref} id="map" />
-      {map ? <Weather map={map} data={data} /> : <Box sx={WeatherComponentStyle}>
-        {!noDataAvailableInResponse && <CircularProgress />}
-      </Box>}
+      {map ? <Weather map={map} data={data} /> : <></>}
     </>
   );
 }
