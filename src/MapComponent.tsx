@@ -1,10 +1,10 @@
+import { Box, CircularProgress, Tooltip } from "@mui/material";
 import { Cluster, Clusters } from "./types";
 import { formatDate, getDuration, getFlattenedData, getPolylinesData } from "./functionss";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { AccessTime } from "@mui/icons-material";
 import FmdGoodOutlinedIcon from '@mui/icons-material/FmdGoodOutlined';
-import { Box, CircularProgress, Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
 // @ts-nocheck
 import { Wrapper } from "@googlemaps/react-wrapper";
@@ -14,6 +14,19 @@ type Props = {
   data: Clusters | null;
   activeCluster: Cluster | null;
 };
+
+const WeatherComponentStyle = {
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  width: '100%',
+  height: '100%',
+  backgroundColor: 'rgba(255, 255, 255, 0.8)',
+  zIndex: 1000,
+}
 // old key : AIzaSyCf2_txZACzBqNY99vHR1YWdbExpCuQ_Lg
 export default function GoogleMaps({ data, activeCluster }: Props) {
   return (
@@ -21,7 +34,7 @@ export default function GoogleMaps({ data, activeCluster }: Props) {
       apiKey={"AIzaSyCXmuZgrN0tJsciGtndwNGsBDT5lISv3bM"}
       version="beta"
       libraries={["marker"]}
-      
+
     >
       <MyMap data={data} activeCluster={activeCluster} />
     </Wrapper>
@@ -40,6 +53,8 @@ const mapOptions = {
 function MyMap({ data, activeCluster }: Props) {
   const [map, setMap] = useState<google.maps.Map>();
   const ref = useRef<HTMLDivElement>(null);
+
+  const noDataAvailableInResponse = data?.length === 0
   useEffect(() => {
     if (data && data.length > 0) {
       if (ref.current) {
@@ -67,23 +82,9 @@ function MyMap({ data, activeCluster }: Props) {
   return (
     <>
       <div ref={ref} id="map" />
-      {/* {map && <Weather map={map} data={data} />} */}
-      {map ? <Weather map={map} data={data} /> :  <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'rgba(255, 255, 255, 0.8)', 
-            zIndex: 1000,
-          }}
-        >
-          <CircularProgress />
-        </Box>}
+      {map ? <Weather map={map} data={data} /> : <Box sx={WeatherComponentStyle}>
+        {!noDataAvailableInResponse && <CircularProgress />}
+      </Box>}
     </>
   );
 }
@@ -94,7 +95,6 @@ type WhetherProps = {
 };
 
 function Weather({ map, data }: WhetherProps) {
-  const [highlight, setHighlight] = useState("");
 
   const flattenedData = useMemo(() => {
     if (!data) return [];
@@ -106,15 +106,15 @@ function Weather({ map, data }: WhetherProps) {
     return getPolylinesData(flattenedData);
   }, [JSON.stringify(flattenedData)]);
 
-  const CheckTimeAppend = (item:any) => {
+  const CheckTimeAppend = (item: any) => {
     let timeString: string;
 
-    flattenedData.forEach((mapData:any) => {
+    flattenedData.forEach((mapData: any) => {
       if ((item.lat === mapData.lat) && (item.lng === mapData.lng)) {
         if (timeString) {
           timeString += ', ' + formatDate(mapData.datetime);
-        }else{
-          timeString=formatDate(mapData.datetime);
+        } else {
+          timeString = formatDate(mapData.datetime);
         }
       }
     })
@@ -220,14 +220,13 @@ function Marker({ map, position, children, onClick }) {
   return <></>;
 }
 function PolyLine({ map, data }) {
-  const polyRef = useRef();
 
   useEffect(() => {
-    if (data.length === 0){
+    if (data.length === 0) {
       const flightPath = new google.maps.Polyline();
       flightPath.setMap(map);
     }
-    else{
+    else {
       const flightPath = new google.maps.Polyline({
         path: data,
         geodesic: true,
@@ -242,7 +241,7 @@ function PolyLine({ map, data }) {
           },
         ],
       });
-  
+
       flightPath.setMap(map);
     }
   }, [map, JSON.stringify(data)]);
