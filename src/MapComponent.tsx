@@ -1,4 +1,4 @@
-import { Box, CircularProgress, Tooltip } from "@mui/material";
+import { Box, CircularProgress, Tooltip, useMediaQuery } from "@mui/material";
 import { Cluster, Clusters } from "./types";
 import { formatDate, getDuration, getFlattenedData, getPolylinesData } from "./functionss";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -87,7 +87,7 @@ function MyMap({ data, activeCluster, apiInProgress }: Props) {
   return (
     <>
       {
-        !map ? <Typography className="no-location">No locations tracked on this date</Typography> : <></>
+        (!map) ? <Typography sx={{ display: { lg: 'none', md: 'none' } }} className="no-location">No locations tracked on this date</Typography> : <></>
       }
       <div ref={ref} id="map" />
       {map ? <Weather map={map} data={data} /> : <></>}
