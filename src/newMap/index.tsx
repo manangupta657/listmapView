@@ -1,22 +1,22 @@
-import "./App.css";
+import "../App.css";
 
-import { Cluster, Clusters } from "./types";
 import dayjs, { Dayjs } from "dayjs";
 import { useEffect, useState } from "react";
 
-import GoogleMaps from "./MapComponent";
-import Grid from "@mui/material/Grid";
-import Header from "./Header";
-import ListView from "./ListView";
-import { getClusters } from "./functionss";
-import { transformClusterData } from "./utils/transform";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
+import { Grid } from "@mui/material";
+import Header from "../Header";
+import GoogleMapsNew from "./newMap";
+import { getClusters, NewCluster, transformClusterData } from "./helper";
+import ListView from "./listView";
 
-function App() {
+type Clusters = NewCluster[];
+type Cluster = NewCluster;
+
+function NewMap() {
   const urlParams = new URLSearchParams(window.location.search);
   const dateParams = urlParams.get("date");
-  const viewParam = urlParams.get("view");
   const [clusters, setClusters] = useState<Clusters | null>(null);
   const [name, setName] = useState("");
   const [startDate, setStartDate] = useState<Dayjs>(
@@ -25,7 +25,7 @@ function App() {
   const formattedDate = dayjs(startDate).format("YYYY-MM-DD");
   const theme = useTheme();
   const matches = useMediaQuery(theme.breakpoints.up("sm"));
-  const [listMode, setListMode] = useState(viewParam === "map" ? false : true);
+  const [listMode, setListMode] = useState(true);
   const [activeCluster, setActiveCluster] = useState<Cluster | null>(null)
   const [apiInProgress, setInProgress] = useState<boolean>(false)
   
@@ -50,14 +50,14 @@ function App() {
           <Grid item xs={12} sm={3.5}>
             <div className="left-side">
               <Header setDate={setStartDate} date={startDate} listMode={listMode} setListMode={setListMode} name={name}/>
-              {( matches || listMode ) ? ( <ListView data={clusters} setActiveCluster={setActiveCluster}/> ) : (<GoogleMaps apiInProgress={apiInProgress} data={clusters} activeCluster={activeCluster}/>)}
+              {( matches || listMode ) ? ( <ListView data={clusters} setActiveCluster={setActiveCluster}/> ) : (<GoogleMapsNew apiInProgress={apiInProgress} data={clusters} activeCluster={activeCluster}/>)}
             </div>
           </Grid>
         
         {matches ? (
           <Grid item xs={12} sm={8.5}>
             <div className="right-side">
-              <GoogleMaps apiInProgress={apiInProgress} data={clusters} activeCluster={activeCluster} />
+              <GoogleMapsNew apiInProgress={apiInProgress} data={clusters} activeCluster={activeCluster} />
             </div>
           </Grid>
         ) : null}
@@ -66,4 +66,4 @@ function App() {
   );
 }
 
-export default App;
+export default NewMap;

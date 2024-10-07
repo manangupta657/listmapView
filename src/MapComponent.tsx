@@ -54,6 +54,7 @@ const mapOptions = {
 function MyMap({ data, activeCluster, apiInProgress }: Props) {
   const [map, setMap] = useState<google.maps.Map>();
   const ref = useRef<HTMLDivElement>(null);
+  
   useEffect(() => {
     if (data && data.length > 0) {
       if (ref.current) {
