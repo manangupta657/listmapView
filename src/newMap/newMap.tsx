@@ -73,17 +73,15 @@ function MyMap({ markers, apiInProgress, activeCluster }: { markers: Clusters | 
             }
         }
     }, [JSON.stringify(markers)]);
-
+    
     useEffect(() => {
         if (activeCluster && map) {
-            // map.setCenter({ lat: activeCluster.lat, lng: activeCluster.lng })
             const bounds = new google.maps.LatLngBounds();
             bounds.extend({ lat: activeCluster.lat, lng: activeCluster.lng });
             map.fitBounds(bounds);
             map.setZoom(15);
         }
-
-    }, [JSON.stringify(activeCluster)])
+    }, [activeCluster, map])
 
     if (apiInProgress) {
         return <Box sx={WeatherComponentStyle}>
@@ -111,7 +109,7 @@ function MyMap({ markers, apiInProgress, activeCluster }: { markers: Clusters | 
             <div ref={ref} id="map" />
             {map && markers && markers.map((item) => (
                 <Marker
-                    key={item.start_time}
+                    key={item.lat + item.lng + item.address}
                     map={map}
                     position={{ lat: item.lat, lng: item.lng }}
                     title={item.address}
@@ -150,12 +148,15 @@ function MyMap({ markers, apiInProgress, activeCluster }: { markers: Clusters | 
                                         </Stack>
                                     </div>
                                 }
-                                <div className='popper-data'>
-                                    <TagIcon />
-                                    <Typography>
-                                        <span className="popper-value"> {item.label}</span>
-                                    </Typography>
-                                </div>
+                                {item.label &&
+                                    <div className='popper-data'>
+                                        <TagIcon />
+                                        <Typography>
+                                            <span className="popper-value"> {item.label}</span>
+                                        </Typography>
+                                    </div>
+                                }
+
                                 {item.comment &&
                                     <div className='popper-data'>
                                         <FormatQuoteIcon sx={{ marginTop: "2px" }} />
@@ -221,7 +222,9 @@ function Marker({ map, position, children, onClick }: any) {
         }
 
         return () => {
-            markerRef.current.map = null;
+            if (markerRef.current) {
+                markerRef.current.map = null;
+            }
         };
     }, []);
 

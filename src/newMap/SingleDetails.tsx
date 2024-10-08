@@ -8,7 +8,7 @@ import ListItemText from "@mui/material/ListItemText";
 import Stack from "@mui/material/Stack";
 import { NewCluster } from "./helper";
 import dayjs from "dayjs";
-import { Chip, IconButton, Typography } from "@mui/material";
+import { Box, Chip, IconButton, Typography } from "@mui/material";
 import ImageRoundedIcon from '@mui/icons-material/ImageRounded';
 import ImageDialog from "./profile-picture-dialog";
 
@@ -46,8 +46,11 @@ export default function SingleDetails(props: Props) {
   return (
     <>
       <ListItemButton onClick={handleClick}>
-        <ListItemAvatar>
+        <ListItemAvatar sx={{position: "relative"}}>
           <Avatar sx={{ background: props.color }}>{props.id}</Avatar>
+          {(props.cluster.isAttendence || props.cluster.isDayEnd) &&
+            <Box sx={{ position: "absolute", top: "0",right: "15px",  width: "10px", height: '10px', borderRadius: "100%", backgroundColor: props.cluster.isAttendence ? "#00C000" : "red" }}></Box>
+          }
         </ListItemAvatar>
         <ListItemText
           primary={<Stack direction={"row"} alignItems={'center'} gap={"1rem"}>
@@ -62,7 +65,9 @@ export default function SingleDetails(props: Props) {
             <Stack>
               <Stack direction="row" alignItems={'center'} gap={"1rem"}>
                 {formatDurationNew(props.startTime)}
-                <Chip sx={{ fontSize: '12px', fontWeight: "bold", height: "20px", display: "flex", alignItems: "center", justifyContent: "center" }} label={props.cluster.label || ""} />
+                {props.cluster.label &&
+                  <Chip sx={{ fontSize: '12px', fontWeight: "bold", height: "20px", display: "flex", alignItems: "center", justifyContent: "center" }} label={props.cluster.label || ""} />
+                }
               </Stack>
               {props.cluster.comment ? <Typography sx={{ fontSize: '12px', fontWeight: 'bold' }}>{props.cluster.comment}</Typography> : <></>}
             </Stack>
