@@ -20,7 +20,7 @@ export default function ListView({ data, setActiveCluster }: Props) {
     <List
       sx={{
         height: "100%",
-        overflowY: "scroll",
+        overflowY: "auto",
         bgcolor: "background.paper",
         py: 0,
       }}

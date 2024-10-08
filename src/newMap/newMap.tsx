@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Wrapper } from "@googlemaps/react-wrapper";
 import { createRoot } from "react-dom/client";
-import { Box, CircularProgress, Tooltip, Typography } from '@mui/material';
-
-
+import { Box, Chip, CircularProgress, Stack, Tooltip, Typography } from '@mui/material';
+import ImageRoundedIcon from '@mui/icons-material/ImageRounded';
 import { AccessTime } from "@mui/icons-material";
 import FmdGoodOutlinedIcon from '@mui/icons-material/FmdGoodOutlined';
 import TagIcon from '@mui/icons-material/Tag';
@@ -11,6 +10,7 @@ import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
 import { formatDate } from '../functionss';
 import { NewCluster } from './helper';
 import { formatDurationNew } from './SingleDetails';
+import ImageDialog from './profile-picture-dialog';
 
 
 type Clusters = NewCluster[];
@@ -58,8 +58,8 @@ export default function GoogleMapsNew({ apiInProgress, data, activeCluster }: Pr
 
 function MyMap({ markers, apiInProgress, activeCluster }: { markers: Clusters | null, apiInProgress: boolean, activeCluster: Cluster | null }) {
     const [map, setMap] = useState<google.maps.Map>();
+    const [imgDialog, setImgDialog] = useState<{ state: boolean, image: string | null }>({ state: false, image: null });
     const ref = useRef<HTMLDivElement>(null);
-    console.log({ activeCluster, markers });
 
     useEffect(() => {
         if (markers && markers.length > 0) {
@@ -142,6 +142,14 @@ function MyMap({ markers, apiInProgress, activeCluster }: { markers: Clusters | 
                                         </Typography>
                                     </div>
                                 )}
+                                {item.image &&
+                                    <div className='popper-data'>
+                                        <Stack sx={{ display: "flex", cursor: "pointer", alignItems: "center", gap: "4px", flexDirection: "row" }}>
+                                            <ImageRoundedIcon />
+                                            <Chip onClick={() => { setImgDialog(() => ({ state: true, image: item.image })) }} sx={{ fontSize: '12px', fontWeight: "bold", height: "20px", display: "flex", alignItems: "center", justifyContent: "center" }} label={"View Image"} />
+                                        </Stack>
+                                    </div>
+                                }
                                 <div className='popper-data'>
                                     <TagIcon />
                                     <Typography>
@@ -150,9 +158,9 @@ function MyMap({ markers, apiInProgress, activeCluster }: { markers: Clusters | 
                                 </div>
                                 {item.comment &&
                                     <div className='popper-data'>
-                                        <FormatQuoteIcon />
+                                        <FormatQuoteIcon sx={{ marginTop: "2px" }} />
                                         <Typography>
-                                            <span className="popper-value"> {item.comment}</span>
+                                            <span className="popper-value" style={{ fontSize: "12px" }}> {item.comment}</span>
                                         </Typography>
                                     </div>
                                 }
@@ -184,6 +192,14 @@ function MyMap({ markers, apiInProgress, activeCluster }: { markers: Clusters | 
             ))}
             {
                 (!map) ? <Typography sx={{ display: { lg: 'none', md: 'none' } }} className="no-location">No locations tracked on this date</Typography> : <></>
+            }
+
+            {imgDialog.state ?
+                <ImageDialog
+                    isOpen={imgDialog.state}
+                    handleClose={() => setImgDialog({ state: false, image: null })}
+                    image={imgDialog.image}
+                /> : <></>
             }
         </>
     );
