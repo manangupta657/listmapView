@@ -86,7 +86,7 @@ export async function getClusters(date: string, searchParams: URLSearchParams) {
         return
     }
 
-    let requestUrl = `https://gg.platform.simplifii.com/api/v1/cards?type=Location&sort_by=+datetime1&equalto___automatic_tracking=0&items_per_page=100&creator=${id}&dateis___recorded_at=${date}&show_columns=string1%2Cstring5%2Cstring6%2Cstring9%2Ctext1%2Cdatetime1%2Cfloat1%2Cfloat2`;
+    let requestUrl = `${url || 'https://gg.platform.simplifii.com/api/v1/cards'}?type=Location&sort_by=+datetime1&equalto___automatic_tracking=0&items_per_page=100&creator=${id}&dateis___recorded_at=${date}&show_columns=string1%2Cstring5%2Cstring6%2Cstring9%2Ctext1%2Cdatetime1%2Cfloat1%2Cfloat2`;
     if (token) {
         requestUrl += `&token=${token}`
     }

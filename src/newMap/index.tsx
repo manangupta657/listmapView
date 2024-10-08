@@ -16,9 +16,10 @@ type Cluster = NewCluster;
 
 function NewMap() {
   const urlParams = new URLSearchParams(window.location.search);
+  const nameParam = urlParams.get("name");
   const dateParams = urlParams.get("date");
   const [clusters, setClusters] = useState<Clusters | null>(null);
-  const [name, setName] = useState("");
+  const [name, setName] = useState(nameParam);
   const [startDate, setStartDate] = useState<Dayjs>(
     dayjs(dateParams || undefined)
   );
@@ -36,7 +37,7 @@ function NewMap() {
       const response = await getClusters(formattedDate, urlParams);
       setInProgress(false)
       setClusters(transformClusterData(response?.response?.data));
-      setName(response?.msg);
+      setName(nameParam);
     }
     getData();
   }, [formattedDate]);
@@ -49,7 +50,7 @@ function NewMap() {
       <Grid container>
           <Grid item xs={12} sm={3.5}>
             <div className="left-side">
-              <Header setDate={setStartDate} date={startDate} listMode={listMode} setListMode={setListMode} name={name}/>
+              <Header setDate={setStartDate} date={startDate} listMode={listMode} setListMode={setListMode} name={name || ''}/>
               {( matches || listMode ) ? ( <ListView data={clusters} setActiveCluster={setActiveCluster}/> ) : (<GoogleMapsNew apiInProgress={apiInProgress} data={clusters} activeCluster={activeCluster}/>)}
             </div>
           </Grid>
