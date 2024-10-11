@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Wrapper } from "@googlemaps/react-wrapper";
 import { createRoot } from "react-dom/client";
 import { Box, Chip, CircularProgress, Stack, Tooltip, Typography } from '@mui/material';
@@ -73,7 +73,7 @@ function MyMap({ markers, apiInProgress, activeCluster }: { markers: Clusters | 
             }
         }
     }, [JSON.stringify(markers)]);
-    
+
     useEffect(() => {
         if (activeCluster && map) {
             const bounds = new google.maps.LatLngBounds();
@@ -104,9 +104,19 @@ function MyMap({ markers, apiInProgress, activeCluster }: { markers: Clusters | 
         return timeString;
     }
 
+    function getPolylinesData(data: Clusters){
+        return data.map(item => ( { lat: item.lat, lng: item.lng }))
+      }
+
+    const polyLinesData = useMemo(() => {
+        if (!markers || !markers.length) return [];
+        return getPolylinesData(markers);
+      }, [JSON.stringify(markers)]);
+
     return (
         <>
             <div ref={ref} id="map" />
+            <PolyLine data={polyLinesData} map={map} />
             {map && markers && markers.map((item) => (
                 <Marker
                     key={item.lat + item.lng + item.address}
@@ -235,6 +245,36 @@ function Marker({ map, position, children, onClick }: any) {
         const listener = markerRef.current.addListener("click", onClick);
         return () => listener.remove();
     }, [map, position, children, onClick]);
+
+    return <></>;
+}
+
+function PolyLine({ map, data }: { map: any, data: any }) {
+
+    useEffect(() => {
+        if (data.length === 0) {
+            const flightPath = new google.maps.Polyline();
+            flightPath.setMap(map);
+        }
+        else {
+            const flightPath = new google.maps.Polyline({
+                path: data,
+                geodesic: true,
+                strokeColor: "#000000",
+                strokeOpacity: 1,
+                strokeWeight: 1,
+                icons: [
+                    {
+                        icon: { path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW },
+                        offset: "100%",
+                        repeat: "80px",
+                    },
+                ],
+            });
+
+            flightPath.setMap(map);
+        }
+    }, [map, JSON.stringify(data)]);
 
     return <></>;
 }

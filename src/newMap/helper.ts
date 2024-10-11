@@ -78,8 +78,6 @@ export async function getClusters(date: string, searchParams: URLSearchParams) {
     const id = searchParams.get("id")
     const token = searchParams.get("token")
     const url = searchParams.get("url")
-    const name = searchParams.get("name")
-    const startFromAttendance = searchParams.get("startFromAttendance")
 
     if (!id) {
         alert("No Id Provided")
