@@ -83,12 +83,6 @@ function MyMap({ markers, apiInProgress, activeCluster }: { markers: Clusters | 
         }
     }, [activeCluster, map])
 
-    if (apiInProgress) {
-        return <Box sx={WeatherComponentStyle}>
-            <CircularProgress />
-        </Box>
-    }
-
     const CheckTimeAppend = (item: any) => {
         let timeString: string = "";
 
@@ -104,14 +98,21 @@ function MyMap({ markers, apiInProgress, activeCluster }: { markers: Clusters | 
         return timeString;
     }
 
-    function getPolylinesData(data: Clusters){
-        return data.map(item => ( { lat: item.lat, lng: item.lng }))
-      }
+    function getPolylinesData(data: Clusters) {
+        return data.map(item => ({ lat: item.lat, lng: item.lng }))
+    }
 
     const polyLinesData = useMemo(() => {
         if (!markers || !markers.length) return [];
         return getPolylinesData(markers);
-      }, [JSON.stringify(markers)]);
+    }, [JSON.stringify(markers)]);
+
+
+    if (apiInProgress) {
+        return <Box sx={WeatherComponentStyle}>
+            <CircularProgress />
+        </Box>
+    }
 
     return (
         <>
