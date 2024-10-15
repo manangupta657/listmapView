@@ -128,12 +128,29 @@ function MyMap({ markers, apiInProgress, activeCluster }: { markers: Clusters | 
                     <Tooltip
                         placement="top"
                         title={
-                            <div className="popper-container">
+                            <>
+                                {item.image &&
+                                    <Box sx={{width: "100%", cursor: "pointer", "&:hover": {
+                                        opacity: "0.8",
+                                        backgroundColor: "black",
+                                        borderRadius: "5px",
+                                    }}}
+                                    onClick={() => { setImgDialog(() => ({ state: true, image: item.image })) }}
+                                    >
+                                        <img 
+                                            alt='Image'
+                                            src={item.image}
+                                            style={{width: "100%", objectFit: "cover", objectPosition:"center", borderRadius: "5px"}}
+                                        />
+                                    </Box>          
+                                }
+                                 <div className="popper-container">
+                                
                                 <div className="popper-data">
                                     {/* <Place /> */}
                                     <FmdGoodOutlinedIcon />
                                     <Typography>
-                                        <span className="popper-value">{item.address}</span>
+                                        <span className="popper-value" style={{fontSize: "14px"}}>{item.address}</span>
                                     </Typography>
                                 </div>
                                 {item.type === "halt" ? (
@@ -151,14 +168,6 @@ function MyMap({ markers, apiInProgress, activeCluster }: { markers: Clusters | 
                                         </Typography>
                                     </div>
                                 )}
-                                {item.image &&
-                                    <div className='popper-data'>
-                                        <Stack sx={{ display: "flex", cursor: "pointer", alignItems: "center", gap: "4px", flexDirection: "row" }}>
-                                            <ImageRoundedIcon />
-                                            <Chip onClick={() => { setImgDialog(() => ({ state: true, image: item.image })) }} sx={{ fontSize: '12px', fontWeight: "bold", height: "20px", display: "flex", alignItems: "center", justifyContent: "center" }} label={"View Image"} />
-                                        </Stack>
-                                    </div>
-                                }
                                 {item.label &&
                                     <div className='popper-data'>
                                         <TagIcon />
@@ -178,6 +187,7 @@ function MyMap({ markers, apiInProgress, activeCluster }: { markers: Clusters | 
                                 }
 
                             </div>
+                            </>
                         }
                         arrow
                         disableFocusListener
