@@ -203,12 +203,18 @@ function MyMap({ markers, apiInProgress, activeCluster }: { markers: Clusters | 
                             },
                         }}
                     >
-                        <div
+                        {item.automatic_tracking ? 
+                    <div
+                    style={{ background: "#0099FF" , width: "9px", height: "9px", borderRadius: "100%"}}
+                    ></div> :
+                    <div
                             className={`marker ${item.type}`}
                             style={{ background: item.color }}
                         >
                             {item.type === "halt" ? item.id : null}
-                        </div>
+                        </div>   
+                    }
+                        
                     </Tooltip>
                 </Marker>
             ))}

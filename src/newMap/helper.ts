@@ -14,6 +14,7 @@ export interface NewCluster {
     label: string
     isAttendence: boolean
     isDayEnd: boolean
+    automatic_tracking: 0 | 1
 }
 
 type Clusters = NewCluster[];
@@ -36,6 +37,7 @@ export type LocationData = {
     user_actions: any[]; // assuming an array of actions, adjust if there's a specific structure
     lat_formatted: number;
     lng_formatted: number;
+    automatic_tracking: 0 | 1;
     route_to_next_cluster: any[]; // assuming an array, adjust if there's a specific structure
 };
 
@@ -77,7 +79,8 @@ export function getFlattenedData(locationData: Clusters){
 export async function getClusters(date: string, searchParams: URLSearchParams) {
     const id = searchParams.get("id")
     const token = searchParams.get("token")
-    const url = searchParams.get("url")
+    const url = searchParams.get("url");
+    const saoParams = searchParams.get("sao"); 
 
     if (!id) {
         alert("No Id Provided")
@@ -95,7 +98,7 @@ export async function getClusters(date: string, searchParams: URLSearchParams) {
         }
     }
 
-    let requestUrl = `${newUrl || 'https://gg.platform.simplifii.com/api/v1/cards'}?type=Location&sort_by=+datetime1&equalto___automatic_tracking=0&items_per_page=100&creator=${id}&dateis___recorded_at=${date}&show_columns=string1%2Cstring5%2Cstring6%2Cstring9%2Ctext1%2Cdatetime1%2Cfloat1%2Cfloat2`;
+    let requestUrl = `${newUrl || 'https://gg.platform.simplifii.com/api/v1/cards'}?type=Location&sort_by=+datetime1${saoParams !== "y" ?"&equalto___automatic_tracking=0" : ""}&items_per_page=500&creator=${id}&dateis___recorded_at=${date}&show_columns=string1%2Cstring5%2Cstring6%2Cstring9%2Ctext1%2Cdatetime1%2Cfloat1%2Cfloat2%2Cbool3`;
     if (token) {
         requestUrl += `&token=${token}`
     }
@@ -107,6 +110,8 @@ export async function getClusters(date: string, searchParams: URLSearchParams) {
 
 export const transformClusterData = (data: LocationData[]): Clusters => {
     const newData: Clusters = [];
+    let idCount = 0;
+
     for (let i = 0; i < data.length; i++) {
         // const { route_to_next_cluster } = data[i];
         const current_data = data[i];
@@ -118,12 +123,17 @@ export const transformClusterData = (data: LocationData[]): Clusters => {
             start_time: current_data.recorded_at,
             type: "halt",
             color: colors[i],
-            id: i + 1,
+            id: current_data.automatic_tracking === 0 ? idCount + 1 : 0,
             comment: current_data.comment,
             label: current_data.label,
             image: current_data.image1,
             isAttendence: ((current_data.dvfga_formatted_address || current_data.dvfga_locality) + current_data.label ).toLocaleLowerCase().includes("attendance"),
-            isDayEnd: ((current_data.dvfga_formatted_address || current_data.dvfga_locality) + current_data.label).toLocaleLowerCase().includes("day end")
+            isDayEnd: ((current_data.dvfga_formatted_address || current_data.dvfga_locality) + current_data.label).toLocaleLowerCase().includes("day end"),
+            automatic_tracking: current_data.automatic_tracking
+        }
+
+        if(current_data.automatic_tracking === 0) {
+            idCount++;
         }
 
         newData.push(new_format);
