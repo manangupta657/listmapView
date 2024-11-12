@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Wrapper } from "@googlemaps/react-wrapper";
 import { createRoot } from "react-dom/client";
-import { Box, Chip, CircularProgress, Stack, Tooltip, Typography } from '@mui/material';
-import ImageRoundedIcon from '@mui/icons-material/ImageRounded';
+import Box from '@mui/material/Box';
+import CircularProgress from '@mui/material/CircularProgress';
+import Tooltip from '@mui/material/Tooltip';
+import Typography from '@mui/material/Typography';
 import { AccessTime } from "@mui/icons-material";
 import FmdGoodOutlinedIcon from '@mui/icons-material/FmdGoodOutlined';
 import TagIcon from '@mui/icons-material/Tag';
@@ -129,7 +131,7 @@ function MyMap({ markers, apiInProgress, activeCluster }: { markers: Clusters | 
                         placement="top"
                         title={
                             <>
-                                {item.image &&
+                                {item.image && !item.automatic_tracking &&
                                     <Box sx={{width: "100%", cursor: "pointer", "&:hover": {
                                         opacity: "0.8",
                                         backgroundColor: "black",
@@ -168,7 +170,7 @@ function MyMap({ markers, apiInProgress, activeCluster }: { markers: Clusters | 
                                         </Typography>
                                     </div>
                                 )}
-                                {item.label &&
+                                {item.label && !item.automatic_tracking &&
                                     <div className='popper-data'>
                                         <TagIcon />
                                         <Typography>
@@ -177,7 +179,7 @@ function MyMap({ markers, apiInProgress, activeCluster }: { markers: Clusters | 
                                     </div>
                                 }
 
-                                {item.comment &&
+                                {item.comment && !item.automatic_tracking &&
                                     <div className='popper-data'>
                                         <FormatQuoteIcon sx={{ marginTop: "2px" }} />
                                         <Typography>
@@ -205,7 +207,7 @@ function MyMap({ markers, apiInProgress, activeCluster }: { markers: Clusters | 
                     >
                         {item.automatic_tracking ? 
                     <div
-                    style={{ background: "#0099FF" , width: "9px", height: "9px", borderRadius: "100%"}}
+                    style={{ background: "#0099FE" , width: "9px", height: "9px", borderRadius: "100%"}}
                     ></div> :
                     <div
                             className={`marker ${item.type}`}

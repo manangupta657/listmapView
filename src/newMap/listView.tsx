@@ -26,7 +26,7 @@ export default function ListView({ data, setActiveCluster }: Props) {
       }}
     >
       {
-        data ?  data.map((item, index) => (
+        data ?  data.filter(d => !d.automatic_tracking).map((item, index) => (
           <SingleDetails
             color={colors[index]}
             label={item.address}
