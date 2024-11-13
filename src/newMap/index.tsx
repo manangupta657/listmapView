@@ -31,7 +31,7 @@ function NewMap() {
   const [listMode, setListMode] = useState(true);
   const [activeCluster, setActiveCluster] = useState<Cluster | null>(null)
   const [apiInProgress, setInProgress] = useState<boolean>(false)
-  const [showAuto,setShowAuto] = useState(false)
+  const [showAuto,setShowAuto] = useState(true)
   const isMobile = useIsMobile();  
 
   useEffect(() => {

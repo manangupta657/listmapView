@@ -111,6 +111,7 @@ export async function getClusters(date: string, searchParams: URLSearchParams) {
 export const transformClusterData = (data: LocationData[]): Clusters => {
     const newData: Clusters = [];
     let idCount = 0;
+    let colorCount = 0;
 
     for (let i = 0; i < data.length; i++) {
         // const { route_to_next_cluster } = data[i];
@@ -122,7 +123,7 @@ export const transformClusterData = (data: LocationData[]): Clusters => {
             lng: current_data.lng,
             start_time: current_data.recorded_at,
             type: "halt",
-            color: colors[i],
+            color: colors[colorCount],
             id: current_data.automatic_tracking === 0 ? idCount + 1 : 0,
             comment: current_data.comment,
             label: current_data.label,
@@ -134,6 +135,7 @@ export const transformClusterData = (data: LocationData[]): Clusters => {
 
         if(current_data.automatic_tracking === 0) {
             idCount++;
+            colorCount++;
         }
 
         newData.push(new_format);
