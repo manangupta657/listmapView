@@ -1,6 +1,6 @@
-import { Box, CircularProgress, Tooltip, useMediaQuery } from "@mui/material";
+import { Box, CircularProgress, Tooltip } from "@mui/material";
 import { Cluster, Clusters } from "./types";
-import { formatDate, getDuration, getFlattenedData, getPolylinesData } from "./functionss";
+import { getDuration, getFlattenedData, getPolylinesData } from "./functionss";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { AccessTime } from "@mui/icons-material";
@@ -90,17 +90,18 @@ function MyMap({ data, activeCluster, apiInProgress }: Props) {
         (!map) ? <Typography sx={{ display: { lg: 'none', md: 'none' } }} className="no-location">No locations tracked on this date</Typography> : <></>
       }
       <div ref={ref} id="map" />
-      {map ? <Weather map={map} data={data} /> : <></>}
+      {map ? <MapWrapper map={map} data={data} activeCluster={activeCluster} /> : <></>}
     </>
   );
 }
 
-type WhetherProps = {
+type MapWrapperProps = {
   map: any;
   data: Clusters | null;
+  activeCluster: any
 };
 
-function Weather({ map, data }: WhetherProps) {
+function MapWrapper({ map, data, activeCluster }: MapWrapperProps) {
 
   const flattenedData = useMemo(() => {
     if (!data) return [];
@@ -108,30 +109,16 @@ function Weather({ map, data }: WhetherProps) {
   }, [JSON.stringify(data)]);
 
   const polyLinesData = useMemo(() => {
-    if (!flattenedData.length) return [];
-    return getPolylinesData(flattenedData);
-  }, [JSON.stringify(flattenedData)]);
+    if (!activeCluster?.route_to_next_cluster?.length) return [];
+    return getPolylinesData(activeCluster?.route_to_next_cluster);
+  }, [JSON.stringify(activeCluster)]);
 
-  const CheckTimeAppend = (item: any) => {
-    let timeString: string;
-
-    flattenedData.forEach((mapData: any) => {
-      if ((item.lat === mapData.lat) && (item.lng === mapData.lng)) {
-        if (timeString) {
-          timeString += ', ' + formatDate(mapData.datetime);
-        } else {
-          timeString = formatDate(mapData.datetime);
-        }
-      }
-    })
-    return timeString;
-  }
 
   return (
     <>
       <PolyLine data={polyLinesData} map={map} />
-      {flattenedData.map((item) => {
-        const key = item.type === "halt" ? item.start_time : item.datetime;
+      {flattenedData?.filter(d => d.stoppageIndex !== undefined).map((item, index) => {
+        const key = item.stoppageIndex;
         return (
           <Marker
             key={key}
@@ -150,21 +137,13 @@ function Weather({ map, data }: WhetherProps) {
                       <span className="popper-value">{item.address}</span>
                     </Typography>
                   </div>
-                  {item.type === "halt" ? (
-                    <div className="popper-data">
-                      <AccessTime />
-                      <Typography>
-                        <span className="popper-value"> {getDuration(item.start_time, item.end_time)}</span>
-                      </Typography>
-                    </div>
-                  ) : (
-                    <div className="popper-data">
-                      <AccessTime />
-                      <Typography>
-                        <span className="popper-value"> {CheckTimeAppend(item)}</span>
-                      </Typography>
-                    </div>
-                  )}
+                  <div className="popper-data">
+                    <AccessTime />
+                    <Typography>
+                      <span className="popper-value"> {getDuration(item.start_time, item.end_time)}</span>
+                    </Typography>
+                  </div>
+
                 </div>
               }
               arrow
@@ -182,10 +161,10 @@ function Weather({ map, data }: WhetherProps) {
               }}
             >
               <div
-                className={`marker ${item.type}`}
+                className={`marker ${item.stoppageIndex}`}
                 style={{ background: item.color }}
               >
-                {item.type === "halt" ? item.id : null}
+                {item.stoppageIndex}
               </div>
             </Tooltip>
           </Marker>

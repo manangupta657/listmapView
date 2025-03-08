@@ -1,7 +1,9 @@
-import axios from "axios";
-import dayjs from "dayjs";
 import { Clusters, FlattenedData } from "./types";
+
+import axios from "axios";
 import { colors } from "./constants";
+import dayjs from "dayjs";
+
 export function formatDate(date: string) {
   const formatedDate = dayjs(date).format("hh:mm a")
   return formatedDate;
@@ -68,6 +70,7 @@ export function getFlattenedData(locationData: Clusters){
         lat: currentLocation.lat,
         lng: currentLocation.lng,
         address: currentLocation.address,
+        stoppageIndex: currentLocation.stoppageIndex,
         type: "halt",
         color: colors[index],
         start_time: currentLocation.start_time,
@@ -82,7 +85,7 @@ export function getFlattenedData(locationData: Clusters){
   return flattenedData
 }
 
-export function getPolylinesData(data: FlattenedData[]){
+export function getPolylinesData(data: Clusters){
   return data.map(item => ( { lat: item.lat, lng: item.lng }))
 }
 

@@ -18,7 +18,7 @@ type Props = {
   label: string;
   startTime: string;
   endTime: string;
-  id: number;
+  stoppageIndex?: number | string;
   routes: RouteToNextCluster[];
   setActiveCluster: (cluster: Cluster | null) => void;
   cluster: Cluster
@@ -41,7 +41,7 @@ export default function SingleDetails(props: Props) {
     <>
       <ListItemButton onClick={handleClick}>
         <ListItemAvatar>
-          <Avatar sx={{ background: props.color }}>{props.id}</Avatar>
+          {props.stoppageIndex && <Avatar sx={{ background: props.color }}>{props.stoppageIndex}</Avatar>}
         </ListItemAvatar>
         <ListItemText
           primary={props.label}

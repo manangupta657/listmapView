@@ -5,6 +5,7 @@ export interface Cluster {
   lng: number
   address: string
   start_time: string
+  stoppageIndex?: number,
   end_time: string
   route_to_next_cluster: RouteToNextCluster[]
 }
@@ -18,15 +19,18 @@ export interface RouteToNextCluster {
 
 export type FlattenedData = {
   lat: number;
+  stoppageIndex: any,
   lng: number;
   address: string;
   color: string;
 } & ({
   type: "halt",
+  stoppageIndex: any,
   start_time: string;
   end_time: string;
   id: number
 } | {
+  stoppageIndex: any,
   type: "route",
   datetime: string;
 }

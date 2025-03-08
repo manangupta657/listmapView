@@ -25,5 +25,12 @@ export const transformClusterData = (data: Clusters): Clusters => {
             });
         }
     }
+    let stoppageIndex = 1;
+    newData.forEach(o => {
+        if (o.route_to_next_cluster.length == 0) {
+            o.stoppageIndex = stoppageIndex;
+            stoppageIndex = stoppageIndex + (o.route_to_next_cluster.length == 0 ? 1 : 0);
+        }
+    })
     return newData
 }

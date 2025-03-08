@@ -1,8 +1,8 @@
 import { Cluster, Clusters } from "./types";
+import { ListItemAvatar, ListItemButton, ListItemText, Skeleton, Typography } from "@mui/material";
 
 import List from "@mui/material/List";
 import SingleDetails from "./SingleDetails";
-import { ListItemAvatar, ListItemButton, ListItemText, Skeleton, Typography } from "@mui/material";
 import { colors } from "./constants";
 
 type Props = {
@@ -21,24 +21,24 @@ export default function ListView({ data, setActiveCluster }: Props) {
       }}
     >
       {
-        data ?  data.map((item, index) => (
-          <SingleDetails
+        data ? data.map((item, index) => {
+          return <SingleDetails
             color={colors[index]}
             label={item.address}
             startTime={item?.start_time}
             endTime={item?.end_time}
-            id={index + 1}
+            stoppageIndex={item.stoppageIndex}
             routes={item.route_to_next_cluster}
             setActiveCluster={setActiveCluster}
             cluster={item}
           />
-        )) : <>
-        <SkeletonLoading/>
-        <SkeletonLoading/>
-        <SkeletonLoading/>
-        <SkeletonLoading/>
-        <SkeletonLoading/>
-      </>
+        }) : <>
+          <SkeletonLoading />
+          <SkeletonLoading />
+          <SkeletonLoading />
+          <SkeletonLoading />
+          <SkeletonLoading />
+        </>
       }
 
       {data && data.length === 0 ? (
@@ -48,26 +48,26 @@ export default function ListView({ data, setActiveCluster }: Props) {
   );
 }
 
-export function SkeletonLoading(){
-  return  <ListItemButton >
+export function SkeletonLoading() {
+  return <ListItemButton >
     <ListItemAvatar>
       <Skeleton animation="wave" variant="circular" width={40} height={40} />
     </ListItemAvatar>
     <ListItemText
-      primary={ <Skeleton
+      primary={<Skeleton
         animation="wave"
         width="80%"
         height={24}
- 
+
       />}
       secondary={
         <Skeleton
-        animation="wave"
-        height={16}
-        width="60%"
-      />
+          animation="wave"
+          height={16}
+          width="60%"
+        />
       }
     />
-    
+
   </ListItemButton>
 }

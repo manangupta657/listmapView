@@ -28,7 +28,7 @@ function App() {
   const [listMode, setListMode] = useState(viewParam === "map" ? false : true);
   const [activeCluster, setActiveCluster] = useState<Cluster | null>(null)
   const [apiInProgress, setInProgress] = useState<boolean>(false)
-  
+
 
   useEffect(() => {
     async function getData() {
@@ -44,21 +44,23 @@ function App() {
   useEffect(() => {
     document.title = `Locations: ${name} - ${startDate ? startDate.format("DD/MM/YYYY") : ""}`
   }, [name, startDate.format("DD/MM/YYYY")])
+
+  const mapEl = <GoogleMaps apiInProgress={apiInProgress} data={clusters} activeCluster={activeCluster} />
   return (
     <>
       <Grid container>
-        
-          <Grid item xs={12} sm={3.5}>
-            <div className="left-side">
-              <Header setDate={setStartDate} date={startDate} listMode={listMode} setListMode={setListMode} name={name}/>
-              {( matches || listMode ) ? ( <ListView data={clusters} setActiveCluster={setActiveCluster}/> ) : (<GoogleMaps apiInProgress={apiInProgress} data={clusters} activeCluster={activeCluster}/>)}
-            </div>
-          </Grid>
-        
+
+        <Grid item xs={12} sm={3.5}>
+          <div className="left-side">
+            <Header setDate={setStartDate} date={startDate} listMode={listMode} setListMode={setListMode} name={name} />
+            {(matches || listMode) ? (<ListView data={clusters} setActiveCluster={setActiveCluster} />) : (mapEl)}
+          </div>
+        </Grid>
+
         {matches ? (
           <Grid item xs={12} sm={8.5}>
             <div className="right-side">
-              <GoogleMaps apiInProgress={apiInProgress} data={clusters} activeCluster={activeCluster} />
+              {mapEl}
             </div>
           </Grid>
         ) : null}
