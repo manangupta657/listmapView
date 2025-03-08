@@ -1,7 +1,9 @@
-import axios from "axios";
-import dayjs from "dayjs";
 import { Clusters, FlattenedData } from "./types";
+
+import axios from "axios";
 import { colors } from "./constants";
+import dayjs from "dayjs";
+
 export function formatDate(date: string) {
   const formatedDate = dayjs(date).format("hh:mm a")
   return formatedDate;
@@ -19,7 +21,7 @@ export function formatDuration(start_time: string, end_time: string) {
   }
 }
 
-export async function getClusters(date: string, searchParams: URLSearchParams) {
+export async function getClusters(date: string, searchParams: URLSearchParams, v2 = false) {
   const id = searchParams.get("id")
   const token = searchParams.get("token")
   const url = searchParams.get("url")
@@ -31,7 +33,7 @@ export async function getClusters(date: string, searchParams: URLSearchParams) {
     return
   } 
 
-  let requestUrl = `https://be.platform.simplifii.com/api/v1/custom/locationCluster?creator=${id}&date=${date}`;
+  let requestUrl = `https://be.platform.simplifii.com/api/v1/custom/${v2 ? 'locationClusterV2' : 'locationCluster'}?creator=${id}&date=${date}`;
   if (token){
     requestUrl += `&token=${token}`
   }

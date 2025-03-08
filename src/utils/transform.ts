@@ -27,3 +27,5 @@ export const transformClusterData = (data: Clusters): Clusters => {
     }
     return newData
 }
+
+export const OLA_KEY = "gqf2EX4lAe2bHlQRmGa0J1H65Qtuwwh3CdEPyx6S"
