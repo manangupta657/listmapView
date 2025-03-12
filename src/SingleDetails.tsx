@@ -21,18 +21,17 @@ type Props = {
   stoppageIndex?: number | string;
   routes: RouteToNextCluster[];
   setActiveCluster: (cluster: Cluster | null) => void;
-  cluster: Cluster
-}
+  cluster: Cluster;
+};
 
 export default function SingleDetails(props: Props) {
   const [open, setOpen] = React.useState(false);
 
   const handleClick = () => {
     if (open) {
-      props.setActiveCluster(null)
-    }
-    else {
-      props.setActiveCluster(props.cluster)
+      props.setActiveCluster(null);
+    } else {
+      props.setActiveCluster(props.cluster);
     }
     setOpen(!open);
   };
@@ -41,7 +40,11 @@ export default function SingleDetails(props: Props) {
     <>
       <ListItemButton onClick={handleClick}>
         <ListItemAvatar>
-          {props.stoppageIndex && <Avatar sx={{ background: props.color }}>{props.stoppageIndex}</Avatar>}
+          {props.stoppageIndex && (
+            <Avatar sx={{ background: props.color }}>
+              {props.stoppageIndex}
+            </Avatar>
+          )}
         </ListItemAvatar>
         <ListItemText
           primary={props.label}
@@ -54,9 +57,11 @@ export default function SingleDetails(props: Props) {
         {props.routes.length > 0 && (open ? <ExpandLess /> : <ExpandMore />)}
       </ListItemButton>
 
-      {props.routes.length > 0 && <Collapse in={open} timeout="auto" unmountOnExit>
-        <BasicTimeline routes={props.routes} color={props.color} />
-      </Collapse>}
+      {props.routes.length > 0 && (
+        <Collapse in={open} timeout="auto" unmountOnExit>
+          <BasicTimeline routes={props.routes} color={props.color} />
+        </Collapse>
+      )}
       <Divider />
     </>
   );

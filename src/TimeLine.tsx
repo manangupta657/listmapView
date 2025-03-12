@@ -10,11 +10,10 @@ import TimelineOppositeContent, {
 import { formatDate } from "./functionss";
 import { RouteToNextCluster } from "./types";
 
-
 type Props = {
-  routes: RouteToNextCluster[],
-  color: string
-}
+  routes: RouteToNextCluster[];
+  color: string;
+};
 
 export default function LeftAlignedTimeline(props: Props) {
   return (
@@ -27,13 +26,15 @@ export default function LeftAlignedTimeline(props: Props) {
     >
       {props.routes.map((item, index: number) => {
         return (
-          <TimelineItem>
+          <TimelineItem key={index}>
             <TimelineOppositeContent color="textSecondary">
               {formatDate(item.datetime1)}
             </TimelineOppositeContent>
             <TimelineSeparator>
               <TimelineDot sx={{ backgroundColor: props.color }} />
-              {index !== props.routes.length - 1 ? <TimelineConnector sx={{height: "10px"}} /> : null}
+              {index !== props.routes.length - 1 ? (
+                <TimelineConnector sx={{ height: "10px" }} />
+              ) : null}
             </TimelineSeparator>
 
             <TimelineContent>{item.address}</TimelineContent>
