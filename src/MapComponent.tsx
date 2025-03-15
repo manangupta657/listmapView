@@ -179,7 +179,9 @@ function MapWrapper({
       <PolyLine data={polyLinesData} map={map} />
       {showOnlyStoppages
         ? flattenedData
-            ?.filter((d) => d.stoppageIndex !== undefined)
+            ?.filter(
+              (d) => d.stoppageIndex !== undefined && d.address !== "Travel 🚗",
+            )
             .map((item) => {
               const key = item.stoppageIndex;
               return (
@@ -187,13 +189,7 @@ function MapWrapper({
                   key={key}
                   map={map}
                   position={{ lat: item.lat, lng: item.lng }}
-                  onClick={() =>
-                    console.log(
-                      flattenedData?.filter(
-                        (d) => d.stoppageIndex !== undefined,
-                      ),
-                    )
-                  }
+                  onClick={null}
                 >
                   <Tooltip
                     placement="top"
@@ -231,7 +227,9 @@ function MapWrapper({
                     }}
                   >
                     <div
-                      className={`marker ${item.stoppageIndex}`}
+                      className={`marker ${
+                        item.address === "Travel 🚗" ? "route" : item.type
+                      }`}
                       style={{ background: item.color }}
                     >
                       {item.stoppageIndex}
@@ -285,7 +283,9 @@ function MapWrapper({
                   }}
                 >
                   <div
-                    className={`marker ${item.stoppageIndex}`}
+                    className={`marker ${
+                      item.address === "Travel 🚗" ? "route" : item.type
+                    }`}
                     style={{ background: item.color }}
                   >
                     {item.stoppageIndex}
@@ -345,7 +345,10 @@ function MapWrapper({
                     },
                   }}
                 >
-                  <div className="marker" style={{ background: "blue" }}></div>
+                  <div
+                    className="marker route"
+                    style={{ background: "blue" }}
+                  ></div>
                 </Tooltip>
               </Marker>
             );
