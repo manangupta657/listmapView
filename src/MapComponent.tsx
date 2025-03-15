@@ -1,8 +1,12 @@
 import { Box, CircularProgress, Tooltip } from "@mui/material";
 import { Cluster, Clusters } from "./types";
-import { getDuration, getFlattenedData, getPolylinesData } from "./functionss";
+import {
+  formatDate,
+  getDuration,
+  getFlattenedData,
+  getPolylinesData,
+} from "./functionss";
 import { useEffect, useMemo, useRef, useState } from "react";
-
 import { AccessTime } from "@mui/icons-material";
 import FmdGoodOutlinedIcon from "@mui/icons-material/FmdGoodOutlined";
 import Typography from "@mui/material/Typography";
@@ -13,6 +17,7 @@ type Props = {
   data: Clusters | null;
   activeCluster: Cluster | null;
   apiInProgress: boolean;
+  showOnlyStoppages: boolean;
 };
 
 const WeatherComponentStyle = {
@@ -32,6 +37,7 @@ export default function GoogleMaps({
   data,
   activeCluster,
   apiInProgress,
+  showOnlyStoppages,
 }: Props) {
   return (
     <Wrapper
@@ -43,6 +49,7 @@ export default function GoogleMaps({
         apiInProgress={apiInProgress}
         data={data}
         activeCluster={activeCluster}
+        showOnlyStoppages={showOnlyStoppages}
       />
     </Wrapper>
   );
@@ -57,7 +64,12 @@ const mapOptions = {
   scaleControl: true,
 };
 
-function MyMap({ data, activeCluster, apiInProgress }: Props) {
+function MyMap({
+  data,
+  activeCluster,
+  apiInProgress,
+  showOnlyStoppages,
+}: Props) {
   const [map, setMap] = useState<google.maps.Map>();
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -105,7 +117,12 @@ function MyMap({ data, activeCluster, apiInProgress }: Props) {
       )}
       <div ref={ref} id="map" />
       {map ? (
-        <MapWrapper map={map} data={data} activeCluster={activeCluster} />
+        <MapWrapper
+          map={map}
+          data={data}
+          activeCluster={activeCluster}
+          showOnlyStoppages={showOnlyStoppages}
+        />
       ) : (
         <></>
       )}
@@ -117,79 +134,222 @@ type MapWrapperProps = {
   map: any;
   data: Clusters | null;
   activeCluster: any;
+  showOnlyStoppages: boolean;
 };
 
-function MapWrapper({ map, data, activeCluster }: MapWrapperProps) {
+function MapWrapper({
+  map,
+  data,
+  activeCluster,
+  showOnlyStoppages,
+}: MapWrapperProps) {
   const flattenedData = useMemo(() => {
     if (!data) return [];
     return getFlattenedData(data);
   }, [data]);
 
   const polyLinesData = useMemo(() => {
-    if (!activeCluster?.route_to_next_cluster?.length || !activeCluster)
-      return [];
-    return getPolylinesData(activeCluster?.route_to_next_cluster);
-  }, [activeCluster]);
+    if (showOnlyStoppages) {
+      if (!activeCluster?.route_to_next_cluster?.length || !activeCluster)
+        return [];
+      return getPolylinesData(activeCluster?.route_to_next_cluster);
+    } else {
+      if (!flattenedData.length) return [];
+      return getPolylinesData(flattenedData);
+    }
+  }, [activeCluster, flattenedData, showOnlyStoppages]);
+
+  const CheckTimeAppend = (item: any) => {
+    let timeString: string = "";
+
+    flattenedData.forEach((mapData: any) => {
+      if (item.lat === mapData.lat && item.lng === mapData.lng) {
+        if (timeString) {
+          timeString += ", " + formatDate(mapData.datetime);
+        } else {
+          timeString = formatDate(mapData.datetime);
+        }
+      }
+    });
+    return timeString;
+  };
 
   return (
     <>
       <PolyLine data={polyLinesData} map={map} />
-      {flattenedData
-        ?.filter((d) => d.stoppageIndex !== undefined)
-        .map((item) => {
-          const key = item.stoppageIndex;
-          return (
-            <Marker
-              key={key}
-              map={map}
-              position={{ lat: item.lat, lng: item.lng }}
-              onClick={null}
-            >
-              <Tooltip
-                placement="top"
-                title={
-                  <div className="popper-container">
-                    <div className="popper-data">
-                      {/* <Place /> */}
-                      <FmdGoodOutlinedIcon />
-                      <Typography>
-                        <span className="popper-value">{item.address}</span>
-                      </Typography>
+      {showOnlyStoppages
+        ? flattenedData
+            ?.filter((d) => d.stoppageIndex !== undefined)
+            .map((item) => {
+              const key = item.stoppageIndex;
+              return (
+                <Marker
+                  key={key}
+                  map={map}
+                  position={{ lat: item.lat, lng: item.lng }}
+                  onClick={() =>
+                    console.log(
+                      flattenedData?.filter(
+                        (d) => d.stoppageIndex !== undefined,
+                      ),
+                    )
+                  }
+                >
+                  <Tooltip
+                    placement="top"
+                    title={
+                      <div className="popper-container">
+                        <div className="popper-data">
+                          {/* <Place /> */}
+                          <FmdGoodOutlinedIcon />
+                          <Typography>
+                            <span className="popper-value">{item.address}</span>
+                          </Typography>
+                        </div>
+                        <div className="popper-data">
+                          <AccessTime />
+                          <Typography>
+                            <span className="popper-value">
+                              {getDuration(item.start_time, item.end_time)}
+                            </span>
+                          </Typography>
+                        </div>
+                      </div>
+                    }
+                    arrow
+                    disableFocusListener
+                    componentsProps={{
+                      tooltip: {
+                        sx: {
+                          bgcolor: "common.white",
+                          color: "common.black",
+                          "& .MuiTooltip-arrow": {
+                            color: "common.white",
+                          },
+                        },
+                      },
+                    }}
+                  >
+                    <div
+                      className={`marker ${item.stoppageIndex}`}
+                      style={{ background: item.color }}
+                    >
+                      {item.stoppageIndex}
                     </div>
-                    <div className="popper-data">
-                      <AccessTime />
-                      <Typography>
-                        <span className="popper-value">
-                          {" "}
-                          {getDuration(item.start_time, item.end_time)}
-                        </span>
-                      </Typography>
+                  </Tooltip>
+                </Marker>
+              );
+            })
+        : flattenedData.map((item) => {
+            const key = item.lat + item.lng;
+            return (
+              <Marker
+                key={key}
+                map={map}
+                position={{ lat: item.lat, lng: item.lng }}
+                onClick={null}
+              >
+                <Tooltip
+                  placement="top"
+                  title={
+                    <div className="popper-container">
+                      <div className="popper-data">
+                        {/* <Place /> */}
+                        <FmdGoodOutlinedIcon />
+                        <Typography>
+                          <span className="popper-value">{item.address}</span>
+                        </Typography>
+                      </div>
+                      <div className="popper-data">
+                        <AccessTime />
+                        <Typography>
+                          <span className="popper-value">
+                            {CheckTimeAppend(item)}
+                          </span>
+                        </Typography>
+                      </div>
                     </div>
-                  </div>
-                }
-                arrow
-                disableFocusListener
-                componentsProps={{
-                  tooltip: {
-                    sx: {
-                      bgcolor: "common.white",
-                      color: "common.black",
-                      "& .MuiTooltip-arrow": {
-                        color: "common.white",
+                  }
+                  arrow
+                  disableFocusListener
+                  componentsProps={{
+                    tooltip: {
+                      sx: {
+                        bgcolor: "common.white",
+                        color: "common.black",
+                        "& .MuiTooltip-arrow": {
+                          color: "common.white",
+                        },
                       },
                     },
-                  },
-                }}
-              >
-                <div
-                  className={`marker ${item.stoppageIndex}`}
-                  style={{ background: item.color }}
+                  }}
                 >
-                  {item.stoppageIndex}
-                </div>
-              </Tooltip>
-            </Marker>
-          );
+                  <div
+                    className={`marker ${item.stoppageIndex}`}
+                    style={{ background: item.color }}
+                  >
+                    {item.stoppageIndex}
+                  </div>
+                </Tooltip>
+              </Marker>
+            );
+          })}
+      {activeCluster &&
+        activeCluster.route_to_next_cluster.map((item, index) => {
+          const key = item.lat + item.lng;
+          if (
+            !(
+              index === 0 ||
+              index === activeCluster.route_to_next_cluster.length - 1
+            )
+          ) {
+            return (
+              <Marker
+                key={key}
+                map={map}
+                position={{ lat: item.lat, lng: item.lng }}
+                onClick={null}
+              >
+                <Tooltip
+                  placement="top"
+                  title={
+                    <div className="popper-container">
+                      <div className="popper-data">
+                        {/* <Place /> */}
+                        <FmdGoodOutlinedIcon />
+                        <Typography>
+                          <span className="popper-value">{item.address}</span>
+                        </Typography>
+                      </div>
+                      <div className="popper-data">
+                        <AccessTime />
+                        <Typography>
+                          <span className="popper-value">
+                            {formatDate(item.datetime1)}
+                          </span>
+                        </Typography>
+                      </div>
+                    </div>
+                  }
+                  arrow
+                  disableFocusListener
+                  componentsProps={{
+                    tooltip: {
+                      sx: {
+                        bgcolor: "common.white",
+                        color: "common.black",
+                        "& .MuiTooltip-arrow": {
+                          color: "common.white",
+                        },
+                      },
+                    },
+                  }}
+                >
+                  <div className="marker" style={{ background: "blue" }}></div>
+                </Tooltip>
+              </Marker>
+            );
+          }
         })}
     </>
   );

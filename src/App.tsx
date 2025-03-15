@@ -28,6 +28,7 @@ function App() {
   const [listMode, setListMode] = useState(viewParam === "map" ? false : true);
   const [activeCluster, setActiveCluster] = useState<Cluster | null>(null);
   const [apiInProgress, setInProgress] = useState<boolean>(false);
+  const [showOnlyStoppages, setShowOnlyStoppages] = useState<boolean>(false);
 
   useEffect(() => {
     async function getData() {
@@ -51,6 +52,7 @@ function App() {
       apiInProgress={apiInProgress}
       data={clusters}
       activeCluster={activeCluster}
+      showOnlyStoppages={showOnlyStoppages}
     />
   );
   return (
@@ -64,6 +66,8 @@ function App() {
               listMode={listMode}
               setListMode={setListMode}
               name={name}
+              setShowOnlyStoppages={setShowOnlyStoppages}
+              showOnlyStoppages={showOnlyStoppages}
             />
             {matches || listMode ? (
               <ListView data={clusters} setActiveCluster={setActiveCluster} />

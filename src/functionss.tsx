@@ -85,8 +85,8 @@ export function getFlattenedData(locationData: Clusters){
   return flattenedData
 }
 
-export function getPolylinesData(data: Clusters){
-  return data.map(item => ( { lat: item.lat, lng: item.lng }))
+export function getPolylinesData(data: Clusters | FlattenedData[]) {
+  return data.map((item) => ({ lat: item.lat, lng: item.lng, address: item.address }));
 }
 
 
