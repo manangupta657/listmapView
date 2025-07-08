@@ -34,7 +34,7 @@ export default function GoogleMaps({
 }: Props) {
   return (
     <Wrapper
-      apiKey={"AIzaSyCXmuZgrN0tJsciGtndwNGsBDT5lISv3bM"}
+      apiKey={"AIzaSyCSc1GCg5e7jEOWz5cutSum9SI0f86E12E"}
       version="beta"
       libraries={["marker"]}
     >
