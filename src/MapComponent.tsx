@@ -72,6 +72,11 @@ function MyMap({
         const map = new window.google.maps.Map(ref.current, {
           ...mapOptions,
           center,
+          // keep zoom clear of the playback panel at the bottom
+          zoomControlOptions: {
+            position: google.maps.ControlPosition.RIGHT_CENTER,
+          },
+          clickableIcons: false,
         });
         setMap(map);
       }
@@ -97,7 +102,7 @@ function MyMap({
   }
 
   return (
-    <>
+    <div className="map-container">
       {!map ? (
         <Typography
           sx={{ display: { lg: "none", md: "none" } }}
@@ -119,7 +124,7 @@ function MyMap({
       ) : (
         <></>
       )}
-    </>
+    </div>
   );
 }
 

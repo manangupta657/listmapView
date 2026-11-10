@@ -1,4 +1,4 @@
-import { Clusters, FlattenedData } from "./types";
+import { Cluster, Clusters, FlattenedData } from "./types";
 
 import axios from "axios";
 import { colors } from "./constants";
@@ -60,6 +60,7 @@ export function getFlattenedData(locationData: Clusters){
         lat: step.lat,
         lng: step.lng,
         address: step.address,
+        full_address: step.full_address,
         type: "route",
         color: colors[index],
         datetime: step.datetime1,
@@ -70,6 +71,7 @@ export function getFlattenedData(locationData: Clusters){
         lat: currentLocation.lat,
         lng: currentLocation.lng,
         address: currentLocation.address,
+        full_address: currentLocation.full_address,
         stoppageIndex: currentLocation.stoppageIndex,
         type: "halt",
         color: colors[index],
@@ -109,4 +111,14 @@ export function getDuration(start_time: string, end_time: string) {
 
   // return formatedDate;
 
+}
+
+
+export const getTransformedLocationForList = (location:Cluster) => {
+  return {
+    lat: location.lat,
+    lng: location.lng,
+    address: location.address,
+    datetime1: location.start_time,
+  }
 }

@@ -1,236 +1,160 @@
-import { JSXElementConstructor, ReactElement, ReactNode, ReactPortal, useMemo } from "react";
+import { Cluster, Clusters, FlattenedData, RouteToNextCluster } from "../types";
+import { ReactNode, useMemo } from "react";
 import { Tooltip, Typography } from "@mui/material";
-import { formatDate, getDuration, getFlattenedData, getPolylinesData } from "../functionss";
+import { formatDate, getDuration, getFlattenedData } from "../functionss";
 
 import { AccessTime } from "@mui/icons-material";
-import { Clusters } from "../types";
 import { CustomMarker } from "./CustomMarker";
 import FmdGoodOutlinedIcon from "@mui/icons-material/FmdGoodOutlined";
-import { PolyLine } from "./Polygon";
+import { RoutePlayback } from "./RoutePlayback";
+import { TRAVEL_LABEL } from "../utils/playback";
+import { usePlayback } from "../playback/PlaybackContext";
 
 export type MapWrapperProps = {
-    map: any;
+    map: google.maps.Map;
     data: Clusters | null;
-    activeCluster: any;
+    activeCluster: Cluster | null;
     showOnlyStoppages: boolean;
 };
 
-export function MapWrapper({
-    map,
-    data,
-    activeCluster,
-    showOnlyStoppages,
-}: MapWrapperProps) {
+function MarkerTooltip({ address, time, children }: { address: string; time: string; children: ReactNode }) {
+    return (
+        <Tooltip
+            placement="top"
+            title={
+                <div className="popper-container">
+                    <div className="popper-data">
+                        <FmdGoodOutlinedIcon />
+                        <Typography>
+                            <span className="popper-value">{address}</span>
+                        </Typography>
+                    </div>
+                    <div className="popper-data">
+                        <AccessTime />
+                        <Typography>
+                            <span className="popper-value">{time}</span>
+                        </Typography>
+                    </div>
+                </div>
+            }
+            arrow
+            disableFocusListener
+            componentsProps={{
+                tooltip: {
+                    sx: {
+                        bgcolor: "common.white",
+                        color: "common.black",
+                        boxShadow: "0 4px 16px rgba(20,24,31,.18)",
+                        "& .MuiTooltip-arrow": { color: "common.white" },
+                    },
+                },
+            }}
+        >
+            {/* Tooltip needs a single element child that can hold a ref */}
+            <div>{children}</div>
+        </Tooltip>
+    );
+}
+
+export function MapWrapper({ map, data, activeCluster, showOnlyStoppages }: MapWrapperProps) {
+    const { track, passedStops } = usePlayback();
+
     const flattenedData = useMemo(() => {
         if (!data) return [];
         return getFlattenedData(data);
     }, [data]);
 
-    const polyLinesData = useMemo(() => {
-        if (showOnlyStoppages) {
-            if (!activeCluster?.route_to_next_cluster?.length || !activeCluster)
-                return [];
-            return getPolylinesData(activeCluster?.route_to_next_cluster);
-        } else {
-            if (!flattenedData.length) return [];
-            return getPolylinesData(flattenedData);
-        }
-    }, [activeCluster, flattenedData, showOnlyStoppages]);
+    const stopPoints = useMemo(
+        () =>
+            flattenedData.filter(
+                (d): d is Extract<FlattenedData, { type: "halt" }> =>
+                    d.type === "halt" && d.stoppageIndex !== undefined && d.address !== TRAVEL_LABEL,
+            ),
+        [flattenedData],
+    );
 
-    const CheckTimeAppend = (item: any) => {
-        let timeString: string = "";
-
-        flattenedData.forEach((mapData: any) => {
-            if (item.lat === mapData.lat && item.lng === mapData.lng) {
-                if (timeString) {
-                    timeString += ", " + formatDate(mapData.datetime);
-                } else {
-                    timeString = formatDate(mapData.datetime);
-                }
-            }
+    // Order of each stop along the track, to know which ones the vehicle passed
+    const stopOrder = useMemo(() => {
+        const order = new Map<number, number>();
+        track.stops.forEach((s, i) => {
+            if (s.point.stopIndex !== undefined) order.set(s.point.stopIndex, i);
         });
-        return timeString;
-    };
+        return order;
+    }, [track]);
 
-    const onlyStoppagePoints = flattenedData
-        ?.filter(
-            (d) => d.stoppageIndex !== undefined && d.address !== "Travel 🚗",
-        );
+    // All times the person was seen at each route coordinate
+    const routeTimes = useMemo(() => {
+        const times = new Map<string, string[]>();
+        flattenedData.forEach((d) => {
+            if (d.type !== "route") return;
+            const key = `${d.lat},${d.lng}`;
+            times.set(key, [...(times.get(key) ?? []), formatDate(d.datetime)]);
+        });
+        return times;
+    }, [flattenedData]);
+
+    const routePoints = useMemo(() => {
+        const stopKeys = new Set(stopPoints.map((s) => `${s.lat},${s.lng}`));
+        const seen = new Set<string>();
+        return flattenedData.filter((d) => {
+            if (d.type !== "route") return false;
+            const key = `${d.lat},${d.lng}`;
+            if (stopKeys.has(key) || seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        });
+    }, [flattenedData, stopPoints]);
+
+    const activeRoute: RouteToNextCluster[] = activeCluster?.route_to_next_cluster ?? [];
+
     return (
         <>
-            <PolyLine data={polyLinesData} map={map} />
-            {onlyStoppagePoints.map((item) => {
-                const key = item.stoppageIndex;
+            <RoutePlayback map={map} />
+
+            {stopPoints.map((item) => {
+                const order = stopOrder.get(item.stoppageIndex as number);
+                const visited = order !== undefined && order < passedStops;
                 return (
                     <CustomMarker
-                        key={key}
+                        key={`stop-${item.stoppageIndex}`}
                         map={map}
                         position={{ lat: item.lat, lng: item.lng }}
                         onClick={null}
                     >
-                        <Tooltip
-                            placement="top"
-                            title={
-                                <div className="popper-container">
-                                    <div className="popper-data">
-                                        {/* <Place /> */}
-                                        <FmdGoodOutlinedIcon />
-                                        <Typography>
-                                            <span className="popper-value">{item.address}</span>
-                                        </Typography>
-                                    </div>
-                                    <div className="popper-data">
-                                        <AccessTime />
-                                        <Typography>
-                                            <span className="popper-value">
-                                                {getDuration(item.start_time, item.end_time)}
-                                            </span>
-                                        </Typography>
-                                    </div>
-                                </div>
-                            }
-                            arrow
-                            disableFocusListener
-                            componentsProps={{
-                                tooltip: {
-                                    sx: {
-                                        bgcolor: "common.white",
-                                        color: "common.black",
-                                        "& .MuiTooltip-arrow": {
-                                            color: "common.white",
-                                        },
-                                    },
-                                },
-                            }}
-                        >
-                            <div
-                                className={`marker ${item.address === "Travel 🚗" ? "route" : item.type
-                                    }`}
-                                style={{ background: item.color }}
-                            >
-                                {item.stoppageIndex}
-                            </div>
-                        </Tooltip>
-                    </CustomMarker>
-                );
-            })
-            }
-            {!showOnlyStoppages && flattenedData.map((item) => {
-                if (onlyStoppagePoints.find(stoppage => stoppage.lat === item.lat && stoppage.lng === item.lng)) return <></>
-                const key = item.lat + item.lng;
-                return (
-                    <CustomMarker
-                        key={key}
-                        map={map}
-                        position={{ lat: item.lat, lng: item.lng }}
-                        onClick={null}
-                    >
-                        <Tooltip
-                            placement="top"
-                            title={
-                                <div className="popper-container">
-                                    <div className="popper-data">
-                                        {/* <Place /> */}
-                                        <FmdGoodOutlinedIcon />
-                                        <Typography>
-                                            <span className="popper-value">{item.address}</span>
-                                        </Typography>
-                                    </div>
-                                    <div className="popper-data">
-                                        <AccessTime />
-                                        <Typography>
-                                            <span className="popper-value">
-                                                {CheckTimeAppend(item)}
-                                            </span>
-                                        </Typography>
-                                    </div>
-                                </div>
-                            }
-                            arrow
-                            disableFocusListener
-                            componentsProps={{
-                                tooltip: {
-                                    sx: {
-                                        bgcolor: "common.white",
-                                        color: "common.black",
-                                        "& .MuiTooltip-arrow": {
-                                            color: "common.white",
-                                        },
-                                    },
-                                },
-                            }}
-                        >
-                            <div
-                                className={`marker ${item.address === "Travel 🚗" ? "route" : item.type
-                                    }`}
-                                style={{ background: item.color }}
-                            >
-                                {item.stoppageIndex}
-                            </div>
-                        </Tooltip>
+                        <MarkerTooltip address={item.full_address ?? item.address} time={getDuration(item.start_time, item.end_time)}>
+                            <div className={`stop-marker ${visited ? "visited" : ""}`}>{item.stoppageIndex}</div>
+                        </MarkerTooltip>
                     </CustomMarker>
                 );
             })}
-            {activeCluster &&
-                activeCluster.route_to_next_cluster.map((item: { lat: any; lng: any; address: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; datetime1: string; }, index: number) => {
-                    const key = item.lat + item.lng;
-                    if (
-                        !(
-                            index === 0 ||
-                            index === activeCluster.route_to_next_cluster.length - 1
-                        )
-                    ) {
-                        return (
-                            <CustomMarker
-                                key={key}
-                                map={map}
-                                position={{ lat: item.lat, lng: item.lng }}
-                                onClick={null}
-                            >
-                                <Tooltip
-                                    placement="top"
-                                    title={
-                                        <div className="popper-container">
-                                            <div className="popper-data">
-                                                {/* <Place /> */}
-                                                <FmdGoodOutlinedIcon />
-                                                <Typography>
-                                                    <span className="popper-value">{item.address}</span>
-                                                </Typography>
-                                            </div>
-                                            <div className="popper-data">
-                                                <AccessTime />
-                                                <Typography>
-                                                    <span className="popper-value">
-                                                        {formatDate(item.datetime1)}
-                                                    </span>
-                                                </Typography>
-                                            </div>
-                                        </div>
-                                    }
-                                    arrow
-                                    disableFocusListener
-                                    componentsProps={{
-                                        tooltip: {
-                                            sx: {
-                                                bgcolor: "common.white",
-                                                color: "common.black",
-                                                "& .MuiTooltip-arrow": {
-                                                    color: "common.white",
-                                                },
-                                            },
-                                        },
-                                    }}
-                                >
-                                    <div
-                                        className="marker route"
-                                        style={{ background: "blue" }}
-                                    ></div>
-                                </Tooltip>
-                            </CustomMarker>
-                        );
-                    }
+
+            {!showOnlyStoppages &&
+                routePoints.map((item) => {
+                    const key = `${item.lat},${item.lng}`;
+                    return (
+                        <CustomMarker key={`route-${key}`} map={map} position={{ lat: item.lat, lng: item.lng }} onClick={null}>
+                            <MarkerTooltip address={item.full_address ?? item.address} time={(routeTimes.get(key) ?? []).join(", ")}>
+                                <div className="route-dot" />
+                            </MarkerTooltip>
+                        </CustomMarker>
+                    );
                 })}
+
+            {activeRoute.map((item, index) => {
+                if (index === 0 || index === activeRoute.length - 1) return null;
+                return (
+                    <CustomMarker
+                        key={`active-${item.lat},${item.lng},${index}`}
+                        map={map}
+                        position={{ lat: item.lat, lng: item.lng }}
+                        onClick={null}
+                    >
+                        <MarkerTooltip address={item.full_address ?? item.address} time={formatDate(item.datetime1)}>
+                            <div className="route-dot active" />
+                        </MarkerTooltip>
+                    </CustomMarker>
+                );
+            })}
         </>
     );
 }
