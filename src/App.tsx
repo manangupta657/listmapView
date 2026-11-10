@@ -2,12 +2,13 @@ import "./App.css";
 
 import { Cluster, Clusters } from "./types";
 import dayjs, { Dayjs } from "dayjs";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import GoogleMaps from "./MapComponent";
-import Grid from "@mui/material/Grid";
 import Header from "./Header";
 import ListView from "./ListView";
+import { PlaybackProvider } from "./playback/PlaybackContext";
+import { cleanDay } from "./utils/cleanup";
 import { getClusters } from "./functionss";
 import { transformClusterData } from "./utils/transform";
 import useMediaQuery from "@mui/material/useMediaQuery";
@@ -17,7 +18,8 @@ function App() {
   const urlParams = new URLSearchParams(window.location.search);
   const dateParams = urlParams.get("date");
   const viewParam = urlParams.get("view");
-  const [clusters, setClusters] = useState<Clusters | null>(null);
+  const [rawData, setRawData] = useState<Clusters | null>(null);
+  const [cleanGps, setCleanGps] = useState(urlParams.get("raw") !== "1");
   const [name, setName] = useState("");
   const [startDate, setStartDate] = useState<Dayjs>(
     dayjs(dateParams || undefined),
@@ -33,57 +35,81 @@ function App() {
   useEffect(() => {
     async function getData() {
       setInProgress(true);
+      setActiveCluster(null);
       const response = await getClusters(formattedDate, urlParams);
       setInProgress(false);
-      setClusters(transformClusterData(response?.response?.data));
-      setName(response?.msg);
+      setRawData(response?.response?.data ?? []);
+      setName(response?.msg ?? "");
     }
     getData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formattedDate]);
 
   useEffect(() => {
     document.title = `Locations: ${name} - ${
       startDate ? startDate.format("DD/MM/YYYY") : ""
     }`;
-  }, [name, startDate.format("DD/MM/YYYY")]);
+  }, [name, startDate]);
 
-  const mapEl = (
-    <GoogleMaps
-      apiInProgress={apiInProgress}
-      data={clusters}
-      activeCluster={activeCluster}
-      showOnlyStoppages={showOnlyStoppages}
-    />
-  );
+  // Raw API data stays untouched; each view works on its own copy
+  const { clusters, cleanup } = useMemo(() => {
+    if (!rawData) return { clusters: null, cleanup: null };
+    const copy: Clusters = structuredClone(rawData);
+    if (!cleanGps) return { clusters: transformClusterData(copy), cleanup: null };
+    const result = cleanDay(copy);
+    return {
+      clusters: transformClusterData(result.clusters, { clean: true }),
+      cleanup: result.stats,
+    };
+  }, [rawData, cleanGps]);
+
+  const toggleCleanGps = () => {
+    setActiveCluster(null);
+    setCleanGps((v) => !v);
+  };
+
+  const showList = matches || listMode;
+  const showMap = matches || !listMode;
+
   return (
-    <>
-      <Grid container>
-        <Grid item xs={12} sm={3.5}>
-          <div className="left-side">
-            <Header
-              setDate={setStartDate}
-              date={startDate}
-              listMode={listMode}
-              setListMode={setListMode}
-              name={name}
-              setShowOnlyStoppages={setShowOnlyStoppages}
-              showOnlyStoppages={showOnlyStoppages}
-            />
-            {matches || listMode ? (
-              <ListView data={clusters} setActiveCluster={setActiveCluster} />
-            ) : (
-              mapEl
-            )}
-          </div>
-        </Grid>
-
-        {matches ? (
-          <Grid item xs={12} sm={8.5}>
-            <div className="right-side">{mapEl}</div>
-          </Grid>
-        ) : null}
-      </Grid>
-    </>
+    <PlaybackProvider data={clusters}>
+      <div className="app-shell">
+        <Header
+          setDate={setStartDate}
+          date={startDate}
+          listMode={listMode}
+          setListMode={setListMode}
+          name={name}
+          setShowOnlyStoppages={setShowOnlyStoppages}
+          showOnlyStoppages={showOnlyStoppages}
+        />
+        <div className="app-body">
+          {showList ? (
+            <aside className="sidebar">
+              <ListView
+                data={clusters}
+                activeCluster={activeCluster}
+                setActiveCluster={setActiveCluster}
+                showOnlyStoppages={showOnlyStoppages}
+                cleanGps={cleanGps}
+                onToggleCleanGps={toggleCleanGps}
+                cleanup={cleanup}
+              />
+            </aside>
+          ) : null}
+          {showMap ? (
+            <main className="map-pane">
+              <GoogleMaps
+                apiInProgress={apiInProgress}
+                data={clusters}
+                activeCluster={activeCluster}
+                showOnlyStoppages={showOnlyStoppages}
+              />
+            </main>
+          ) : null}
+        </div>
+      </div>
+    </PlaybackProvider>
   );
 }
 

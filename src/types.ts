@@ -4,6 +4,8 @@ export interface Cluster {
   lat: number
   lng: number
   address: string
+  /** original address when `address` was shortened by the GPS clean-up */
+  full_address?: string
   start_time: string
   stoppageIndex?: number,
   end_time: string
@@ -15,22 +17,22 @@ export interface RouteToNextCluster {
   lat: number
   lng: number
   address: string
+  full_address?: string
 }
 
 export type FlattenedData = {
   lat: number;
-  stoppageIndex: any,
+  stoppageIndex?: number;
   lng: number;
   address: string;
+  full_address?: string;
   color: string;
 } & ({
   type: "halt",
-  stoppageIndex: any,
   start_time: string;
   end_time: string;
   id: number
 } | {
-  stoppageIndex: any,
   type: "route",
   datetime: string;
 }
