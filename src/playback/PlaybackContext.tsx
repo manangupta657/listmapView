@@ -8,7 +8,8 @@ import {
   useRef,
   useState,
 } from "react";
-import { Track, TrackPoint, buildTrack } from "../utils/playback";
+import { RoadLeg, fetchRoadLegs } from "../utils/roadRoute";
+import { Track, TrackPoint, buildTrack, withRoadGeometry } from "../utils/playback";
 
 import { Clusters } from "../types";
 import { getFlattenedData } from "../functionss";
@@ -23,6 +24,8 @@ const STOP_HOLD_MS = 1200;
 
 type PlaybackState = {
   track: Track;
+  /** "road" once OSRM geometry is applied, else straight lines between readings */
+  distanceSource: "road" | "straight";
   status: PlaybackStatus;
   speed: number;
   follow: boolean;
@@ -54,9 +57,30 @@ export function PlaybackProvider({
   data: Clusters | null;
   children: ReactNode;
 }) {
-  const track = useMemo(
+  // Straight-line track first; upgraded to follow roads once OSRM answers
+  const baseTrack = useMemo(
     () => buildTrack(data ? getFlattenedData(data) : []),
     [data],
+  );
+  const [road, setRoad] = useState<{ base: Track; legs: RoadLeg[] } | null>(null);
+
+  useEffect(() => {
+    if (baseTrack.points.length < 2) return;
+    const ctrl = new AbortController();
+    fetchRoadLegs(baseTrack.points, ctrl.signal)
+      .then((legs) => {
+        if (legs) setRoad({ base: baseTrack, legs });
+      })
+      .catch(() => {
+        /* offline / blocked → keep straight lines */
+      });
+    return () => ctrl.abort();
+  }, [baseTrack]);
+
+  const roadReady = road !== null && road.base === baseTrack;
+  const track = useMemo(
+    () => (roadReady && road ? withRoadGeometry(baseTrack, road.legs) : baseTrack),
+    [baseTrack, road, roadReady],
   );
 
   const [status, setStatus] = useState<PlaybackStatus>("stopped");
@@ -72,14 +96,23 @@ export function PlaybackProvider({
   statusRef.current = status;
   speedRef.current = SPEEDS[speedIdx];
 
-  // New day → back to the start
+  // New day → back to the start. Road upgrade of the same day → keep the position.
+  const prevTrackRef = useRef<{ base: Track; total: number } | null>(null);
   useEffect(() => {
+    const prev = prevTrackRef.current;
+    prevTrackRef.current = { base: baseTrack, total: track.total };
+    if (prev && prev.base === baseTrack && prev.total > 0) {
+      const scaled = (progressRef.current / prev.total) * track.total;
+      progressRef.current = scaled;
+      setProgress(scaled);
+      return;
+    }
     progressRef.current = 0;
     holdUntilRef.current = 0;
     setProgress(0);
     setArrivedAt(null);
     setStatus("stopped");
-  }, [track]);
+  }, [track, baseTrack]);
 
   // ---- animation loop ----------------------------------------------------
   useEffect(() => {
@@ -220,6 +253,7 @@ export function PlaybackProvider({
   const value = useMemo<PlaybackState>(
     () => ({
       track,
+      distanceSource: roadReady ? "road" : "straight",
       status,
       speed: SPEEDS[speedIdx],
       follow,
@@ -237,6 +271,7 @@ export function PlaybackProvider({
     }),
     [
       track,
+      roadReady,
       status,
       speedIdx,
       follow,

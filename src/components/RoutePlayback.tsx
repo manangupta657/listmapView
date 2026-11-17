@@ -66,6 +66,8 @@ export function RoutePlayback({ map }: { map: google.maps.Map }) {
   const angleRef = useRef(0);
   const followRef = useRef(follow);
   followRef.current = follow;
+  const statusRef = useRef(status);
+  statusRef.current = status;
 
   const hasRoute = track.points.length >= 2;
 
@@ -122,6 +124,9 @@ export function RoutePlayback({ map }: { map: google.maps.Map }) {
     vehicleRef.current = vehicle;
     arrowRef.current = el.querySelector(".nav-arrow");
     angleRef.current = 0;
+
+    // Show the whole day when it loads (and when the road route arrives), unless a replay is running
+    if (statusRef.current === "stopped") fitTrack(map, track);
 
     // Dragging the map means the user wants to look around — stop following.
     const dragListener = map.addListener("dragstart", () => setFollow(false));

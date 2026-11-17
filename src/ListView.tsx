@@ -32,7 +32,7 @@ export default function ListView({
   onToggleCleanGps,
   cleanup,
 }: Props) {
-  const { track, status, atStop, passedStops, seek, seekToStop, follow } = usePlayback();
+  const { track, distanceSource, status, atStop, passedStops, seek, seekToStop, follow } = usePlayback();
   const [expanded, setExpanded] = useState<number | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -115,7 +115,7 @@ export default function ListView({
           ) : null}
         </div>
         <div className="stat-grid">
-          <Stat label="Distance" value={track.total > 0 ? formatKm(track.total) : "—"} loading={!data} />
+          <Stat label={distanceSource === "road" ? "Distance · by road" : "Distance · straight line"} value={track.total > 0 ? formatKm(track.total) : "—"} loading={!data} />
           <Stat label="Stops" value={summary ? String(summary.stops) : "—"} loading={!data} />
           <Stat label="On the move" value={summary ? formatMinutes(summary.moving) : "—"} loading={!data} />
           <Stat label="At stops" value={summary ? formatMinutes(summary.stopped) : "—"} loading={!data} />
@@ -168,7 +168,7 @@ export default function ListView({
             const nextStop = data[index + 1]?.stoppageIndex;
             const from = prevStop !== undefined ? stopInfo.get(prevStop) : undefined;
             const to = nextStop !== undefined ? stopInfo.get(nextStop) : undefined;
-            const legKm = from && to ? formatKm(to.dist - from.dist) : null;
+            const legKm = from ? formatKm((to?.dist ?? track.total) - from.dist) : null;
             const onLeg = active && atStop === null && prevStop !== undefined && prevStop === lastPassed;
             const legDone = active && to !== undefined && to.order < passedStops;
             const isOpen = expanded === index;

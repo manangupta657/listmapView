@@ -14,6 +14,8 @@ export type TrackPoint = {
   stopIndex?: number;
   startTime?: string;
   endTime?: string;
+  /** point inserted from road geometry, not a GPS reading */
+  synthetic?: boolean;
 };
 
 export type TrackStop = { dist: number; point: TrackPoint };
@@ -115,6 +117,11 @@ export function buildTrack(data: FlattenedData[]): Track {
     points.push(point);
   }
 
+  return finalizeTrack(points);
+}
+
+/** Distances + stop index for an ordered list of points */
+function finalizeTrack(points: TrackPoint[]): Track {
   const cumDist: number[] = [];
   let total = 0;
   points.forEach((p, i) => {
@@ -127,6 +134,78 @@ export function buildTrack(data: FlattenedData[]): Track {
     .filter((s) => s.point.stopIndex !== undefined);
 
   return { points, cumDist, total, stops };
+}
+
+/**
+ * Insert road geometry between consecutive readings so the route and the vehicle
+ * follow real roads. Inserted points get times spread by distance along their leg
+ * and carry the address of the reading they left from.
+ * `legs[i]` must connect track.points[i] → track.points[i + 1].
+ */
+export function withRoadGeometry(
+  track: Track,
+  legs: { distance: number; coords: { lat: number; lng: number }[] }[],
+): Track {
+  if (legs.length !== track.points.length - 1) return track;
+
+  const points: TrackPoint[] = [];
+  const push = (p: TrackPoint) => {
+    const last = points[points.length - 1];
+    if (last && last.lat === p.lat && last.lng === p.lng) {
+      // keep the real reading (with its stop details) over an inserted road point
+      if (!p.synthetic && last.synthetic) points[points.length - 1] = p;
+      return;
+    }
+    points.push(p);
+  };
+
+  // index of each real reading in `points`, to rescale every leg afterwards
+  const realIdx: number[] = [];
+
+  track.points.forEach((from, i) => {
+    push(from);
+    realIdx.push(points.length - 1);
+    const to = track.points[i + 1];
+    const inner = legs[i]?.coords.slice(1, -1) ?? [];
+    if (!to || !inner.length) return;
+
+    const path = [from, ...inner, to];
+    const segs = path.slice(1).map((p, k) => distance(path[k], p));
+    const legLen = segs.reduce((s, d) => s + d, 0);
+    const start = from.departAt ?? from.arriveAt;
+    const end = to.arriveAt;
+
+    let acc = 0;
+    inner.forEach((c, k) => {
+      acc += segs[k];
+      const t = start !== null && end !== null && legLen > 0 ? start + ((end - start) * acc) / legLen : null;
+      push({ lat: c.lat, lng: c.lng, address: from.address, arriveAt: t, departAt: t, synthetic: true });
+    });
+  });
+
+  // Make every leg measure exactly OSRM's distance (what the backend adds up),
+  // instead of the length of the drawn geometry.
+  const result = finalizeTrack(points);
+  const cum = [0];
+  for (let i = 0; i < legs.length; i++) {
+    const a = realIdx[i];
+    const b = realIdx[i + 1];
+    const drawn = result.cumDist[b] - result.cumDist[a];
+    const scale = drawn > 0 ? legs[i].distance / drawn : 0;
+    for (let k = a + 1; k <= b; k++) {
+      const seg = result.cumDist[k] - result.cumDist[k - 1];
+      cum[k] = cum[k - 1] + (drawn > 0 ? seg * scale : k === b ? legs[i].distance : 0);
+    }
+  }
+  if (cum.length !== result.points.length) return result;
+  return {
+    ...result,
+    cumDist: cum,
+    total: cum[cum.length - 1],
+    stops: result.points
+      .map((point, i) => ({ dist: cum[i], point }))
+      .filter((s) => s.point.stopIndex !== undefined),
+  };
 }
 
 /** Position, heading and interpolated clock time at `dist` metres along the track */
