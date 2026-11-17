@@ -363,9 +363,6 @@ export function RoutePlayback({ map }: { map: google.maps.Map }) {
           </div>
 
           <div className="playback-meta playback-meta-end">
-            <Typography variant="caption" color="text.secondary">
-              {follow ? "Following vehicle" : ""}
-            </Typography>
             <Typography variant="caption" color="text.secondary" noWrap className="tabular">
               {fmtTime(first.arriveAt)} – {fmtTime(lastPoint.departAt ?? lastPoint.arriveAt)}
             </Typography>
