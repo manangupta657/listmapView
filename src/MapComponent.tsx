@@ -1,10 +1,24 @@
 import { Box, CircularProgress } from "@mui/material";
 import { Cluster, Clusters } from "./types";
-import { useEffect, useRef, useState } from "react";
+import { Component, ReactNode, useEffect, useRef, useState } from "react";
 
 import { MapWrapper } from "./components/MapWrapper";
 import Typography from "@mui/material/Typography";
 import { Wrapper } from "@googlemaps/react-wrapper";
+
+/** If Google Maps fails (bad key, outage), only the map area shows an error — the timeline keeps working */
+class MapErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  render() {
+    if (this.state.failed) {
+      return <Typography className="no-location">The map couldn't load. The timeline still works.</Typography>;
+    }
+    return this.props.children;
+  }
+}
 
 type Props = {
   data: Clusters | null;
@@ -38,12 +52,14 @@ export default function GoogleMaps({
       version="beta"
       libraries={["marker"]}
     >
-      <MyMap
-        apiInProgress={apiInProgress}
-        data={data}
-        activeCluster={activeCluster}
-        showOnlyStoppages={showOnlyStoppages}
-      />
+      <MapErrorBoundary>
+        <MyMap
+          apiInProgress={apiInProgress}
+          data={data}
+          activeCluster={activeCluster}
+          showOnlyStoppages={showOnlyStoppages}
+        />
+      </MapErrorBoundary>
     </Wrapper>
   );
 }

@@ -87,3 +87,44 @@ export async function fetchRoadLegs(points: LatLng[], signal?: AbortSignal): Pro
   cache.set(key, legs);
   return legs;
 }
+
+/** Port of Functions::getAerialDistanceUsingFormula() (metres, rounded like the PHP) */
+function aerialDistance(a: LatLng, b: LatLng) {
+  const rad = (d: number) => (d * Math.PI) / 180;
+  const cos =
+    Math.sin(rad(a.lat)) * Math.sin(rad(b.lat)) +
+    Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.cos(rad(a.lng - b.lng));
+  const miles = ((Math.acos(Math.min(1, cos)) * 180) / Math.PI) * 60 * 1.1515;
+  return Math.round(miles * 1.609344 * 100) / 100 * 1000;
+}
+
+/**
+ * Same logic as the backend's total_autologged_distance
+ * (be/custom/Functions.php → phoneClaimLimitCheck):
+ *  - readings after 06:00, in time order
+ *  - more than 300 readings → skip any within 100 m of the previous kept one
+ *  - more than 600 kept → no distance (null), like the backend
+ *  - OSRM driving distance for every consecutive pair, summed, km to 2 decimals
+ */
+export async function fetchAutologgedKm(
+  readings: { lat: number; lng: number; time: string }[],
+  signal?: AbortSignal,
+): Promise<number | null> {
+  const sorted = readings
+    .filter((r) => (r.time ?? "").slice(11) > "06:00:00")
+    .sort((a, b) => a.time.localeCompare(b.time));
+
+  const kept: LatLng[] = [];
+  for (const r of sorted) {
+    if (sorted.length > 300 && kept.length && aerialDistance(kept[kept.length - 1], r) <= 100) continue;
+    kept.push({ lat: r.lat, lng: r.lng });
+  }
+
+  if (kept.length < 2) return 0;
+  if (kept.length > 600) return null;
+
+  const legs = await fetchRoadLegs(kept, signal);
+  if (!legs) return null;
+  const metres = legs.reduce((sum, leg) => sum + leg.distance, 0);
+  return Math.round(metres * 0.001 * 100) / 100;
+}

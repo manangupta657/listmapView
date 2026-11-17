@@ -72,7 +72,7 @@ function App() {
   const showMap = matches || !listMode;
 
   return (
-    <PlaybackProvider data={clusters}>
+    <PlaybackProvider data={clusters} rawData={rawData}>
       <div className="app-shell">
         <Header
           setDate={setStartDate}

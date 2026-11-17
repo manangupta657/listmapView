@@ -8,8 +8,8 @@ import {
   useRef,
   useState,
 } from "react";
-import { RoadLeg, fetchRoadLegs } from "../utils/roadRoute";
-import { Track, TrackPoint, buildTrack, withRoadGeometry } from "../utils/playback";
+import { RoadLeg, fetchAutologgedKm, fetchRoadLegs } from "../utils/roadRoute";
+import { Track, TrackPoint, buildTrack, scaleTrack, withRoadGeometry } from "../utils/playback";
 
 import { Clusters } from "../types";
 import { getFlattenedData } from "../functionss";
@@ -24,8 +24,11 @@ const STOP_HOLD_MS = 1200;
 
 type PlaybackState = {
   track: Track;
-  /** "road" once OSRM geometry is applied, else straight lines between readings */
-  distanceSource: "road" | "straight";
+  /**
+   * "autologged": total matches the backend's total_autologged_distance logic
+   * "road": OSRM along the map's points · "straight": straight lines (no routing)
+   */
+  distanceSource: "autologged" | "road" | "straight";
   status: PlaybackStatus;
   speed: number;
   follow: boolean;
@@ -52,9 +55,12 @@ const ProgressContext = createContext(0);
 
 export function PlaybackProvider({
   data,
+  rawData,
   children,
 }: {
   data: Clusters | null;
+  /** untouched API clusters — the distance always uses these, like the backend */
+  rawData: Clusters | null;
   children: ReactNode;
 }) {
   // Straight-line track first; upgraded to follow roads once OSRM answers
@@ -78,10 +84,30 @@ export function PlaybackProvider({
   }, [baseTrack]);
 
   const roadReady = road !== null && road.base === baseTrack;
-  const track = useMemo(
-    () => (roadReady && road ? withRoadGeometry(baseTrack, road.legs) : baseTrack),
-    [baseTrack, road, roadReady],
-  );
+
+  // Day distance computed exactly like the backend's KM Actual, from every raw reading
+  const [auto, setAuto] = useState<{ raw: Clusters; km: number | null } | null>(null);
+  useEffect(() => {
+    if (!rawData?.length) return;
+    const readings = rawData.flatMap((c) => [
+      { lat: c.lat, lng: c.lng, time: c.start_time },
+      ...(c.route_to_next_cluster ?? []).map((r) => ({ lat: r.lat, lng: r.lng, time: r.datetime1 })),
+    ]);
+    const ctrl = new AbortController();
+    fetchAutologgedKm(readings, ctrl.signal)
+      .then((km) => setAuto({ raw: rawData, km }))
+      .catch(() => {
+        /* offline / blocked → keep the map's own distance */
+      });
+    return () => ctrl.abort();
+  }, [rawData]);
+  const autoKm = auto && auto.raw === rawData ? auto.km : null;
+
+  const track = useMemo(() => {
+    const t = roadReady && road ? withRoadGeometry(baseTrack, road.legs) : baseTrack;
+    // Replay, progress and timeline all add up to the auto-logged total
+    return autoKm ? scaleTrack(t, autoKm * 1000) : t;
+  }, [baseTrack, road, roadReady, autoKm]);
 
   const [status, setStatus] = useState<PlaybackStatus>("stopped");
   const [progress, setProgress] = useState(0);
@@ -253,7 +279,7 @@ export function PlaybackProvider({
   const value = useMemo<PlaybackState>(
     () => ({
       track,
-      distanceSource: roadReady ? "road" : "straight",
+      distanceSource: autoKm ? "autologged" : roadReady ? "road" : "straight",
       status,
       speed: SPEEDS[speedIdx],
       follow,
@@ -272,6 +298,7 @@ export function PlaybackProvider({
     [
       track,
       roadReady,
+      autoKm,
       status,
       speedIdx,
       follow,
