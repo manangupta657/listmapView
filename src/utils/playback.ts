@@ -258,34 +258,6 @@ export function formatMinutes(minutes: number) {
   return `${h}h ${String(r).padStart(2, "0")}m`;
 }
 
-/** A silence longer than this between readings is "no GPS signal", not driving */
-export const SIGNAL_GAP_MIN = 30;
-
-/**
- * Split a drive's time into moving vs no-signal minutes, using the readings
- * inside it. E.g. 15:53 → (no readings) → 22:15 is 6h 22m with no signal.
- */
-export function travelTime(start: string, end: string, readings: string[]) {
-  const s = dayjs(start).valueOf();
-  const e = dayjs(end).valueOf();
-  if (!Number.isFinite(s) || !Number.isFinite(e) || e <= s) return { moving: 0, noSignal: 0 };
-
-  const times = [
-    s,
-    ...readings.map((r) => dayjs(r).valueOf()).filter((t) => Number.isFinite(t) && t > s && t < e),
-    e,
-  ].sort((a, b) => a - b);
-
-  let moving = 0;
-  let noSignal = 0;
-  for (let i = 1; i < times.length; i++) {
-    const mins = (times[i] - times[i - 1]) / 60000;
-    if (mins > SIGNAL_GAP_MIN) noSignal += mins;
-    else moving += mins;
-  }
-  return { moving, noSignal };
-}
-
 export function minutesBetween(start?: string, end?: string) {
   if (!start || !end) return 0;
   const diff = dayjs(end).diff(dayjs(start), "minute", true);
@@ -295,16 +267,4 @@ export function minutesBetween(start?: string, end?: string) {
 export function formatKm(meters: number) {
   if (meters < 1000) return `${Math.round(meters)} m`;
   return `${(meters / 1000).toFixed(meters < 10000 ? 2 : 1)} km`;
-}
-
-/** Stretch a track's distances so its total matches `total` metres (positions are unchanged) */
-export function scaleTrack(track: Track, total: number): Track {
-  if (track.total <= 0 || total <= 0) return track;
-  const k = total / track.total;
-  return {
-    ...track,
-    cumDist: track.cumDist.map((d) => d * k),
-    total,
-    stops: track.stops.map((s) => ({ ...s, dist: s.dist * k })),
-  };
 }

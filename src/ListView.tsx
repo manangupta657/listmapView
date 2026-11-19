@@ -2,7 +2,7 @@ import { Cluster, Clusters } from "./types";
 import { Collapse, IconButton, Skeleton, Switch, Typography } from "@mui/material";
 import { CleanupStats } from "./utils/cleanup";
 import { DirectionsCarRounded, ExpandLess, ExpandMore } from "@mui/icons-material";
-import { TRAVEL_LABEL, formatKm, formatMinutes, minutesBetween, travelTime } from "./utils/playback";
+import { TRAVEL_LABEL, formatKm, formatMinutes, minutesBetween } from "./utils/playback";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import BasicTimeline from "./TimeLine";
@@ -22,8 +22,6 @@ type Props = {
 
 const fmt = (t?: string) => (t ? dayjs(t).format("hh:mm a") : "");
 const isTravel = (c: Cluster) => c.address === TRAVEL_LABEL;
-const legTime = (c: Cluster) =>
-  travelTime(c.start_time, c.end_time, c.route_to_next_cluster.map((r) => r.datetime1));
 
 export default function ListView({
   data,
@@ -75,23 +73,19 @@ export default function ListView({
   const summary = useMemo(() => {
     if (!data?.length) return null;
     let moving = 0;
-    let noSignal = 0;
     let stopped = 0;
     let stops = 0;
     data.forEach((c) => {
-      if (isTravel(c)) {
-        const t = legTime(c);
-        moving += t.moving;
-        noSignal += t.noSignal;
-      } else {
-        stopped += minutesBetween(c.start_time, c.end_time);
+      const mins = minutesBetween(c.start_time, c.end_time);
+      if (isTravel(c)) moving += mins;
+      else {
+        stopped += mins;
         stops += 1;
       }
     });
     return {
       stops,
       moving,
-      noSignal,
       stopped,
       first: fmt(data[0].start_time),
       last: fmt(data[data.length - 1].end_time),
@@ -121,30 +115,9 @@ export default function ListView({
           ) : null}
         </div>
         <div className="stat-grid">
-          <Stat
-            label={
-              distanceSource === "autologged"
-                ? "Distance · auto-logged"
-                : distanceSource === "road"
-                  ? "Distance · by road"
-                  : "Distance · straight line"
-            }
-            value={
-              track.total <= 0
-                ? "—"
-                : distanceSource === "autologged"
-                  ? `${(track.total / 1000).toFixed(2)} km` // same rounding as KM Actual
-                  : formatKm(track.total)
-            }
-            loading={!data}
-          />
+          <Stat label={distanceSource === "road" ? "Distance · by road" : "Distance · straight line"} value={track.total > 0 ? formatKm(track.total) : "—"} loading={!data} />
           <Stat label="Stops" value={summary ? String(summary.stops) : "—"} loading={!data} />
-          <Stat
-            label="On the move"
-            value={summary ? formatMinutes(summary.moving) : "—"}
-            note={summary && summary.noSignal >= 1 ? `+ ${formatMinutes(summary.noSignal)} no GPS signal` : undefined}
-            loading={!data}
-          />
+          <Stat label="On the move" value={summary ? formatMinutes(summary.moving) : "—"} loading={!data} />
           <Stat label="At stops" value={summary ? formatMinutes(summary.stopped) : "—"} loading={!data} />
         </div>
         <label className="cleanup-row">
@@ -211,8 +184,7 @@ export default function ListView({
                   <span className="tl-rail" aria-hidden="true" />
                   <DirectionsCarRounded sx={{ fontSize: 16 }} />
                   <span className="tabular">
-                    Travel{legKm ? ` · ${legKm}` : ""} · {formatMinutes(legTime(item).moving)}
-                    {legTime(item).noSignal >= 1 ? ` · no signal ${formatMinutes(legTime(item).noSignal)}` : ""}
+                    Travel{legKm ? ` · ${legKm}` : ""} · {formatMinutes(minutesBetween(item.start_time, item.end_time))}
                   </span>
                 </button>
                 {item.route_to_next_cluster.length > 0 ? (
@@ -273,12 +245,11 @@ export default function ListView({
   );
 }
 
-function Stat({ label, value, note, loading }: { label: string; value: string; note?: string; loading: boolean }) {
+function Stat({ label, value, loading }: { label: string; value: string; loading: boolean }) {
   return (
     <div className="stat">
       <div className="stat-label">{label}</div>
       <div className="stat-value tabular">{loading ? <Skeleton width="60%" /> : value}</div>
-      {note ? <div className="stat-note">{note}</div> : null}
     </div>
   );
 }
